@@ -9,12 +9,16 @@ const https = require('https');
 let currentTime = new Date();
 let cache = {
     active: false,
-    resetTime: null,
+    resetTime: currentTime,
     data: {
         liveries: [],
         aircraft: []
     }
 };
+
+function GetNewCacheTime() {
+    return new Date(new Date().getTime() + 20*60000)
+}
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -81,6 +85,9 @@ app.get('/packages', (req, res) => {
                     });
                 });
             });
+
+            cache.active = true;
+            cache.resetTime = GetNewCacheTime();
 
             //res.send("hi")
         });
