@@ -28,21 +28,26 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Should you be here?');
+  res.status(403).send('Should you be here?');
 });
 
-app.get('/packages', (req, res) => {
+app.get('/packages', async (req, res) => {
   if (!cache.active || cache.resetTime <= currentTime) {
     let ghrepo = client.repo(env.REPO_NAME);
     let aircraftData = [];
     let liveryData = [];
 
-    ghrepo.contents('/liveries', 'master', (_, data) => {
-      if (data == null) {
-        if (cache.data.liveries !== null) {
-          res.send(cahce.data.liveries);
+    await ghrepo.contents('/liveries', 'master', (_, data) => {
+      if (!data) {
+        if (cache.data.liveries.length != 0) {
+          return res.json(cache.data);
         } else {
-          res.send({ error: true, code: 'ERROR: GH-NR', message: 'No github response, please try again later' });
+          Log(`No response from the GitHub API!`, Log.SEVERITY.WARNING);
+          return res.status(500).json({
+            error: true,
+            code: 'ERROR: GH-NR',
+            message: 'No github response, please try again later',
+          });
         }
       }
 
@@ -65,9 +70,13 @@ app.get('/packages', (req, res) => {
                     return Log(`${aircraftPath} has no manifest`, Log.SEVERITY.ERROR);
                   }
 
-                  aircraftData.push(JSON.parse(rData));
+                  try {
+                    aircraftData.push(JSON.parse(rData));
+                  } catch (error) {
+                    return Log(`${aircraftPath} has invalid JSON: ${rData}`, Log.SEVERITY.ERROR);
+                  }
 
-                  cache.data.aircraft = aircraftData;
+                  cache.data.aircraft.push(aircraftData);
                 });
               });
             }
@@ -76,7 +85,7 @@ app.get('/packages', (req, res) => {
 
         aircraftData.forEach(aircraft => {
           aircraft.liveries.forEach(livery => {
-            if (livery.manifestURL == null) {
+            if (!livery.manifestURL) {
               return Log(`${livery.uniqueId} has no manifest`, Log.SEVERITY.ERROR);
             }
 
@@ -87,12 +96,11 @@ app.get('/packages', (req, res) => {
 
       cache.active = true;
       cache.resetTime = GetNewCacheTime();
-
-      //res.send("hi")
+      return res.json(cache.data);
     });
-  }
+  } else return res.json(cache.data);
 });
 
-app.listen(port, () => {
-  Log(`Listening at localhost:${port}`, Log.SEVERITY.INFO);
+let listener = app.listen(port || 8080, () => {
+  Log(`Listening at localhost:${listener.address().port}`, Log.SEVERITY.INFO);
 });
