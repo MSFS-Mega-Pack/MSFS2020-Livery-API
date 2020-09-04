@@ -68,7 +68,11 @@ app.get('/packages', (req, res) => {
                                         return console.log(`[ERROR] : ${aircraftPath} has no manifest`)
                                     };
 
-                                    aircraftData.push(JSON.parse(rData));
+                                    try {
+                                        aircraftData.push(JSON.parse(rData));
+                                    } catch (error) {
+                                        console.log(`[ERROR] : ${aircraftPath} has invalid JSON: ${rData}`)
+                                    }
 
 
                                     cache.data.aircraft = aircraftData;
@@ -80,7 +84,7 @@ app.get('/packages', (req, res) => {
 
                 aircraftData.forEach(aircraft => {
                     aircraft.liveries.forEach(livery => {
-                        if (livery.manifestURL == null) {
+                        if (!livery.manifestURL) {
                             return console.log(`[ERROR] : ${livery.uniqueId} has no manifest`);
                         }
 
@@ -93,7 +97,6 @@ app.get('/packages', (req, res) => {
             cache.active = true;
             cache.resetTime = GetNewCacheTime();
 
-            //res.send("hi")
         });
     };
 });
