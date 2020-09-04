@@ -30,18 +30,18 @@ app.get('/', (req, res) => {
     res.send("Should you be here?");
 });
 
-app.get('/packages', (req, res) => {
+app.get('/packages', async (req, res) => {
     if (!cache.active || (cache.resetTime <= currentTime)) {
         let ghrepo = client.repo(env.REPO_NAME);
         let aircraftData = [];
         let liveryData = [];
 
-        ghrepo.contents('/liveries', 'master', (_, data) => {
+        await ghrepo.contents('/liveries', 'master', (_, data) => {
             if (!data) {
                 if (cache.data.liveries.length != 0) {
-                    return res.send(cache.data.liveries);
+                    return res.json(cache.data.liveries);
                 } else {
-                    return res.status(500).send({
+                    return res.status(500).json({
                         error: true,
                         code: 'ERROR: GH-NR',
                         message: "No github response, please try again later"
@@ -98,7 +98,7 @@ app.get('/packages', (req, res) => {
             cache.resetTime = GetNewCacheTime();
 
         });
-    };
+    } else return res.json(cache.data.liveries)
 });
 
 app.listen(port, () => {
