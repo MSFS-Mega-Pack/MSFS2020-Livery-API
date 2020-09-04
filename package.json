@@ -1,16 +1,36 @@
 {
-  "name": "MSFS2020-API",
+  "name": "msfs2020-api",
   "version": "0.1.0",
   "description": "A simple express API for livery manager",
   "main": "index.js",
   "repository": "https://github.com/MSFS-Mega-Pack/MSFS2020-Livery-API.git",
-  "author": "MSFS-Megapack Team",
+  "contributors": [
+    {
+      "name": "David Wheatley",
+      "email": "hi@davwheat.dev",
+      "url": "https://davwheat.dev"
+    }
+  ],
   "license": "MIT",
+  "scripts": {
+    "start": "node .",
+    "watch": "pm2 start index.js --watch --name \"MSFS 2020 Livery API\"",
+    "format": "prettier --write \"**/*.{js,json}\"",
+    "stop": "pm2 stop index.js --watch",
+    "status": "pm2 status",
+    "monitor": "pm2 monit",
+    "logs": "pm2 logs \"MSFS 2020 Livery API\""
+  },
   "dependencies": {
+    "chalk": "^4.1.0",
     "dotenv": "^8.2.0",
     "eslint": "^7.8.1",
     "express": "^4.17.1",
     "https": "^1.0.0",
     "octonode": "^0.9.5"
+  },
+  "devDependencies": {
+    "pm2": "^4.4.1",
+    "prettier": "^2.1.1"
   }
 }
