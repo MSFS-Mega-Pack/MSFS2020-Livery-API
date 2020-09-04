@@ -17,7 +17,7 @@ let cache = {
 };
 
 function GetNewCacheTime() {
-    return new Date(new Date().getTime() + 20*60000)
+    return new Date(new Date().getTime() + 20 * 60000)
 }
 
 app.use((req, res, next) => {
@@ -37,11 +37,15 @@ app.get('/packages', (req, res) => {
         let liveryData = [];
 
         ghrepo.contents('/liveries', 'master', (_, data) => {
-            if(data == null) {
-                if(cache.data.liveries !== null) {
-                    res.send(cahce.data.liveries);
+            if (!data) {
+                if (cache.data.liveries.length != 0) {
+                    return res.send(cache.data.liveries);
                 } else {
-                    res.send({error: true, code: 'ERROR: GH-NR', message: "No github response, please try again later"});
+                    return res.status(500).send({
+                        error: true,
+                        code: 'ERROR: GH-NR',
+                        message: "No github response, please try again later"
+                    });
                 };
             };
 
@@ -51,22 +55,22 @@ app.get('/packages', (req, res) => {
                 console.log(aircraftPath)
                 ghrepo.contents(aircraftPath, 'master', (_, aData) => {
                     aData.forEach(content => {
-                        if(content.name == 'aircraftManifest.json') {
+                        if (content.name == 'aircraftManifest.json') {
                             https.get(`https://raw.githubusercontent.com/${env.REPO_NAME}/master/${content.path}`, (resData) => {
                                 let rData = '';
-    
+
                                 resData.on('data', (chunk) => {
                                     rData += chunk
                                 });
-    
+
                                 resData.on('end', () => {
-                                    if(rData == '404: Not Found') {
+                                    if (rData == '404: Not Found') {
                                         return console.log(`[ERROR] : ${aircraftPath} has no manifest`)
                                     };
-    
+
                                     aircraftData.push(JSON.parse(rData));
-    
-    
+
+
                                     cache.data.aircraft = aircraftData;
                                 });
                             });
@@ -76,7 +80,7 @@ app.get('/packages', (req, res) => {
 
                 aircraftData.forEach(aircraft => {
                     aircraft.liveries.forEach(livery => {
-                        if(livery.manifestURL == null) {
+                        if (livery.manifestURL == null) {
                             return console.log(`[ERROR] : ${livery.uniqueId} has no manifest`);
                         }
 
