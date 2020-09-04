@@ -27,7 +27,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    res.send("Should you be here?");
+    res.status(403).send("Should you be here?");
 });
 
 app.get('/packages', async (req, res) => {
@@ -39,7 +39,7 @@ app.get('/packages', async (req, res) => {
         await ghrepo.contents('/liveries', 'master', (_, data) => {
             if (!data) {
                 if (cache.data.liveries.length != 0) {
-                    return res.json(cache.data.liveries);
+                    return res.json(cache.data);
                 } else {
                     return res.status(500).json({
                         error: true,
@@ -75,7 +75,7 @@ app.get('/packages', async (req, res) => {
                                     }
 
 
-                                    cache.data.aircraft = aircraftData;
+                                    cache.data.aircraft.push(aircraftData);
                                 });
                             });
                         };
@@ -96,9 +96,10 @@ app.get('/packages', async (req, res) => {
 
             cache.active = true;
             cache.resetTime = GetNewCacheTime();
+            return res.json(cache.data);
 
         });
-    } else return res.json(cache.data.liveries)
+    } else return res.json(cache.data);
 });
 
 let listener = app.listen(port || 8080, () => {
