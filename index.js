@@ -5,6 +5,7 @@ const port = env.PORT;
 const github = require('octonode');
 const client = github.client(env.GIT_TOKEN);
 const https = require('https');
+const Log = require('./logger');
 
 let currentTime = new Date();
 let cache = {
@@ -61,7 +62,7 @@ app.get('/packages', (req, res) => {
 
                 resData.on('end', () => {
                   if (rData == '404: Not Found') {
-                    return console.log(`[ERROR] : ${aircraftPath} has no manifest`);
+                    return Log(`${aircraftPath} has no manifest`, Log.SEVERITY.ERROR);
                   }
 
                   aircraftData.push(JSON.parse(rData));
@@ -76,7 +77,7 @@ app.get('/packages', (req, res) => {
         aircraftData.forEach(aircraft => {
           aircraft.liveries.forEach(livery => {
             if (livery.manifestURL == null) {
-              return console.log(`[ERROR] : ${livery.uniqueId} has no manifest`);
+              return Log(`${livery.uniqueId} has no manifest`, Log.SEVERITY.ERROR);
             }
 
             console.log(livery.manifestURL.split('...'));
@@ -93,5 +94,5 @@ app.get('/packages', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`[INFO] : Listening at: localhost:${port}`);
+  Log(`Listening at localhost:${port}`, Log.SEVERITY.INFO);
 });

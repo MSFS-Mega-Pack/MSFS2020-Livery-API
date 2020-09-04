@@ -14,7 +14,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node .",
-    "watch": "pm2 start index.js --watch --name \"MSFS 2020 Livery API\"",
+    "watch": "pm2 start index.js --watch --name \"MSFS 2020 Livery API\" -- --color",
     "format": "prettier --write \"**/*.{js,json}\"",
     "stop": "pm2 stop index.js --watch",
     "status": "pm2 status",
