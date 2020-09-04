@@ -101,6 +101,6 @@ app.get('/packages', async (req, res) => {
     } else return res.json(cache.data.liveries)
 });
 
-app.listen(port, () => {
-    console.log(`[INFO] : Listening at: localhost:${port}`)
+let listener = app.listen(port || 8080, () => {
+    console.log(`[INFO] : Listening at: localhost:${listener.address().port}`)
 });
