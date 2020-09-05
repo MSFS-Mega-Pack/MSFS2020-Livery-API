@@ -12,17 +12,17 @@ const DefaultHandler = require('./Handlers/default');
 let currentTime = new Date();
 let ActiveCache = Cache;
 
-function GetNewCacheTime() {
-  return new Date(new Date().getTime() + 20 * 60000);
-}
-
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Access-Control-Allow-Methods', 'GET');
   res.header('Access-Control-Max-Age', 86400);
+  res.header('Cache-Control', 'public, max-age=60, stale-if-error=600');
   next();
 });
+
+// Add ETag caching
+app.set('etag', 'strong');
 
 app.get('/get/sourcelist', (req, res) => GetHandlers.SourceList(req, res, ActiveCache));
 app.get('/get/allaircraft', (req, res) => GetHandlers.AllAircraft(req, res, ActiveCache));
