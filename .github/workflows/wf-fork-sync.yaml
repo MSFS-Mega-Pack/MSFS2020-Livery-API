@@ -1,0 +1,26 @@
+  
+on:
+  schedule:
+    - cron:  '* * * * *'
+    # scheduled at 07:00 every Monday and Thursday
+
+jobs:
+  sync_with_upstream:
+    runs-on: ubuntu-latest
+    name: Sync master with upstream latest
+
+    steps:
+    - name: Checkout master
+      uses: actions/checkout@v2
+      with:
+        ref: master
+        
+    - name: Pull upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v1
+      with:
+        upstream_repository: MSFS-Mega-Pack/MSFS2020-Livery-API
+        upstream_branch: master
+
+    - name: Timestamp
+      run: date
