@@ -13,6 +13,8 @@ function SendJSONResponse(res, data, wasCached, cachedAt = null, statusCode = 20
     cachedAt && res.setHeader('X-cached-by-origin-at', cachedAt);
   }
 
+  res.setHeader('Last-Modified', cachedAt ? new Date(cachedAt).toUTCString() : new Date().toUTCString());
+
   return res.status(statusCode).json({
     cached: wasCached || false,
     cachedAt: cachedAt || null,
@@ -33,6 +35,8 @@ function SendFileResponse(res, path, wasCached = false, cachedAt = null, statusC
     res.setHeader('X-cached-by-origin', 1);
     cachedAt && res.setHeader('X-cached-by-origin-at', cachedAt);
   }
+
+  res.setHeader('Last-Modified', cachedAt ? new Date(cachedAt).toUTCString() : new Date().toUTCString());
 
   return res.status(statusCode).sendFile(path, {
     // root is one up from current dir
