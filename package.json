@@ -18,6 +18,7 @@
   "scripts": {
     "start": "node index.js",
     "watch": "pm2 start index.js --watch --name \"MSFS 2020 Livery API\" -- --color",
+    "restart": "yarn stop && yarn watch",
     "format": "prettier --write \"**/*.{js,json}\"",
     "stop": "pm2 stop index.js --watch",
     "status": "pm2 status",
@@ -30,6 +31,7 @@
     "eslint": "^7.8.1",
     "express": "^4.17.1",
     "https": "^1.0.0",
+    "node-fetch": "^2.6.0",
     "octonode": "^0.9.5"
   },
   "devDependencies": {

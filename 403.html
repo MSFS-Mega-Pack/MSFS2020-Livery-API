@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oops</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        font-family: Poppins, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+      }
+
+      *,
+      ::before,
+      ::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      main {
+        z-index: 1;
+        text-align: center;
+        box-shadow: 0 0 18px 20px #fffa;
+        background: #fffa;
+        padding: 24px;
+        pointer-events: none;
+      }
+
+      main > * {
+        margin: auto;
+      }
+
+      h1 {
+        font-size: 64px;
+      }
+
+      p {
+        font-size: 20px;
+      }
+
+      a:any-link {
+        pointer-events: all;
+      }
+
+      #particles-js {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Get outta here!</h1>
+      <p>There's nothing interesting to see...</p>
+      <p><a href="https://github.com/MSFS-Mega-Pack">View our GitHub repos</a></p>
+    </main>
+    <div id="particles-js"></div>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js" crossorigin="anonymous"></script>
+    <script>
+      particlesJS('particles-js', {
+        particles: {
+          number: {
+            value: 142,
+            density: {
+              enable: true,
+              value_area: 950,
+            },
+          },
+          color: {
+            value: '#000000',
+          },
+          shape: {
+            type: 'circle',
+            stroke: {
+              width: 0,
+              color: '#000000',
+            },
+            polygon: {
+              nb_sides: 3,
+            },
+            image: {
+              src: 'img/github.svg',
+              width: 100,
+              height: 100,
+            },
+          },
+          opacity: {
+            value: 0.5,
+            random: false,
+            anim: {
+              enable: false,
+              speed: 1,
+              opacity_min: 0.1,
+              sync: false,
+            },
+          },
+          size: {
+            value: 3,
+            random: true,
+            anim: {
+              enable: false,
+              speed: 40,
+              size_min: 0.1,
+              sync: false,
+            },
+          },
+          line_linked: {
+            enable: true,
+            distance: 150,
+            color: '#000000',
+            opacity: 0.4,
+            width: 0.8,
+          },
+          move: {
+            enable: true,
+            speed: 6,
+            direction: 'none',
+            random: false,
+            straight: false,
+            out_mode: 'out',
+            bounce: false,
+            attract: {
+              enable: false,
+              rotateX: 600,
+              rotateY: 1200,
+            },
+          },
+        },
+        interactivity: {
+          detect_on: 'canvas',
+          events: {
+            onhover: {
+              enable: true,
+              mode: 'bubble',
+            },
+            onclick: {
+              enable: true,
+              mode: 'push',
+            },
+            resize: true,
+          },
+          modes: {
+            grab: {
+              distance: 400,
+              line_linked: {
+                opacity: 1,
+              },
+            },
+            bubble: {
+              distance: 400,
+              size: 6,
+              duration: 2,
+              opacity: 1,
+              speed: 3,
+            },
+            repulse: {
+              distance: 200,
+              duration: 0.4,
+            },
+            push: {
+              particles_nb: 4,
+            },
+            remove: {
+              particles_nb: 2,
+            },
+          },
+        },
+        retina_detect: true,
+      });
+    </script>
+  </body>
+</html>
