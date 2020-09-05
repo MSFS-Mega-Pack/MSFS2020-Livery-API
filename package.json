@@ -4,6 +4,9 @@
   "description": "A simple express API for livery manager",
   "main": "index.js",
   "repository": "https://github.com/MSFS-Mega-Pack/MSFS2020-Livery-API.git",
+   "engines": {
+    "node": "12.x"
+  },
   "contributors": [
     {
       "name": "David Wheatley",
