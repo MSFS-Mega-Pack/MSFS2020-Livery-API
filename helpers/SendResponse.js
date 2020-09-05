@@ -4,6 +4,7 @@ const Path = require('path');
  * @param {import('express').Response} res
  * @param {object} data JSON data
  * @param {boolean} wasCached Indicates whether the returned data was cached
+ * @param {number} cachedAt A timestamp of when this CacheItem was saved
  * @param {number} [statusCode=200] Status code to be returned
  */
 function SendJSONResponse(res, data, wasCached, cachedAt = null, statusCode = 200) {
@@ -24,6 +25,7 @@ function SendJSONResponse(res, data, wasCached, cachedAt = null, statusCode = 20
  * @param {import('express').Response} res
  * @param {object} path File path, relative to repo root
  * @param {boolean} wasCached Indicates whether the returned data was cached
+ * @param {number} cachedAt A timestamp of when this CacheItem was saved
  * @param {number} [statusCode=200] Status code to be returned
  */
 function SendFileResponse(res, path, wasCached = false, cachedAt = null, statusCode = 200) {
