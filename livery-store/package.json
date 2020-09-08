@@ -8,7 +8,8 @@
   "private": true,
   "scripts": {
     "sync": "node .",
-    "zip": "node zip.js"
+    "zip": "node zip.js",
+    "clean":"rm -r downloads/ public/"
   },
   "dependencies": {
     "archiver": "^5.0.0",
