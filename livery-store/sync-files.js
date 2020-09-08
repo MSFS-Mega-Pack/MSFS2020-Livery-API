@@ -2,7 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
 
-const LIVERY_DIR_ID = '1ZUYrsC71w21npqlKM8SXHMX2HReybZO_';
+const LIVERY_DIR_IDS = ['1ZUYrsC71w21npqlKM8SXHMX2HReybZO_'];
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
@@ -76,18 +76,20 @@ let drive;
 async function listFiles(auth) {
   drive = google.drive({ version: 'v3', auth });
 
-  const result = await drive.files.list({
-    orderBy: 'name',
-    pageSize: 1000,
-    fields: 'nextPageToken, incompleteSearch, files(name, id, mimeType, modifiedTime, md5Checksum)',
-    q: `'${LIVERY_DIR_ID}' in parents and trashed = false`,
-  });
+  for (LIVERY_DIR_ID of LIVERY_DIR_IDS) {
+    const result = await drive.files.list({
+      orderBy: 'name',
+      pageSize: 1000,
+      fields: 'nextPageToken, incompleteSearch, files(name, id, mimeType, modifiedTime, md5Checksum)',
+      q: `'${LIVERY_DIR_ID}' in parents and trashed = false`,
+    });
 
-  const files = result.data.files;
-  if (files.length) {
-    await RecursiveDownload(files, './downloads');
-  } else {
-    console.log('No files found.');
+    const files = result.data.files;
+    if (files.length) {
+      await RecursiveDownload(files, './downloads');
+    } else {
+      console.log('No files found.');
+    }
   }
 }
 
