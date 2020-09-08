@@ -7,9 +7,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "sync": "node ."
+    "sync": "node .",
+    "zip": "node zip.js"
   },
   "dependencies": {
+    "archiver": "^5.0.0",
+    "chalk": "^4.1.0",
     "googleapis": "^59.0.0"
   }
 }

@@ -123,7 +123,7 @@ async function RecursiveDownload(files, currentPath) {
         q: `'${file.id}' in parents and trashed = false`,
       });
 
-      await RecursiveDownload(result.data.files, `${currentPath}/${file.name}`);
+      RecursiveDownload(result.data.files, `${currentPath}/${file.name}`);
     } else {
       let text = false;
 
@@ -146,10 +146,7 @@ async function RecursiveDownload(files, currentPath) {
 
       if (!text) {
         await new Promise((resolve, reject) => {
-          console.log(`Downloading ${file.name}`);
-
           var dest = fs.createWriteStream(`${currentPath}/${file.name}`);
-          let progress = 0;
 
           result.data
             .on('end', function () {
@@ -158,31 +155,39 @@ async function RecursiveDownload(files, currentPath) {
               resolve();
             })
             .on('error', function (err) {
-              console.log('\nError during download', err);
+              console.log('>>> Error during download', err);
               dest.close();
               reject(err);
             })
             .pipe(dest);
         });
       } else {
-        // TODO: Add drive.files.export fucntionality for text files.
-        // await new Promise((resolve, reject) => {
-        //   console.log(`Downloading ${file.name}`);
-        //   var dest = fs.createWriteStream(`${currentPath}/${file.name}`);
-        //   let progress = 0;
-        //   result.data
-        //     .on('end', function () {
-        //       console.log(`Downloaded ${file.name}`);
-        //       dest.close();
-        //       resolve();
-        //     })
-        //     .on('error', function (err) {
-        //       console.log('\nError during download', err);
-        //       dest.close();
-        //       reject(err);
-        //     })
-        //     .pipe(dest);
-        // });
+        console.log(`Is text: ${file.name} (ID: ${file.id})`);
+
+        result = await drive.files.export(
+          {
+            fileId: file.id,
+            mimeType: 'text/plain',
+          },
+          { responseType: 'stream' }
+        );
+
+        await new Promise((resolve, reject) => {
+          var dest = fs.createWriteStream(`${currentPath}/${file.name}`);
+
+          result.data
+            .on('end', function () {
+              console.log(`Downloaded ${file.name}`);
+              dest.close();
+              resolve();
+            })
+            .on('error', function (err) {
+              console.log('>>> Error during download', err);
+              dest.close();
+              reject(err);
+            })
+            .pipe(dest);
+        });
       }
     }
   });
