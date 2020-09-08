@@ -1,0 +1,15 @@
+{
+  "name": "msfs2020-api-livery-store",
+  "version": "0.1.0",
+  "description": "Private: livery store updater",
+  "main": "sync-files.js",
+  "author": "David Wheatley <hi@davwheat.dev>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "sync": "node ."
+  },
+  "dependencies": {
+    "googleapis": "^59.0.0"
+  }
+}
