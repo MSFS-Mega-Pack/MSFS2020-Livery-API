@@ -7,6 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "start": "yarn sync && yarn zip && node -r dotenv/config cloud-storage.js && yarn clean",
     "sync": "node .",
     "zip": "node zip.js",
     "upload": "node cloud-storage.js",

@@ -19,11 +19,12 @@ fs.readdir('./public', function (err, files) {
         return console.log('Unable to scan directory: ' + err);
     }
     //listing all files using forEach
-    files.forEach(function (file) {
+    files.forEach(async function (file) {
         // Do whatever you want to do with the file
         console.log(file);
-        uploadFile(`./public/${file}`)
+       await uploadFile(`./public/${file}`)
     });
+    return console.log('Done!')
 });
 
 async function uploadFile(filename) {
