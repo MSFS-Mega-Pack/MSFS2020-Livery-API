@@ -4,8 +4,8 @@ const convert = require('xml-js');
  * Get JSON object with all files availible on the server
  * @return {Object} JSON object
  */
-function getAllFiles() {
-    request('https://msfs-liverypack-cdn.mrproper.dev/', function (error, response, body) {
+async function getAllFiles() {
+    request('https://msfs-liverypack-cdn.mrproper.dev/', async function (error, response, body) {
         if (!error && response.statusCode == 200) {
             let result = convert.xml2js(body, {
                 ignoreComment: true,
@@ -24,7 +24,6 @@ function getAllFiles() {
                 };
                 endVersion.push(AirplaneObject)
             }
-            console.log(JSON.stringify(endVersion));
             return endVersion;
         }
     });
