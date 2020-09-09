@@ -1,7 +1,16 @@
 const archiver = require('archiver');
 
-const { readdir, stat, mkdir, unlink } = require('fs').promises;
-const { createWriteStream, existsSync, unlinkSync } = require('fs');
+const {
+  readdir,
+  stat,
+  mkdir,
+  unlink
+} = require('fs').promises;
+const {
+  createWriteStream,
+  existsSync,
+  unlinkSync
+} = require('fs');
 
 const chalk = require('chalk');
 
@@ -9,43 +18,61 @@ const GetDirectories = async (path = '.') =>
   (await stat(path)).isDirectory() ? Promise.all(await readdir(path)).then(results => [].concat(...results)) : [];
 
 async function Main() {
-  await mkdir('./downloads', { recursive: true, mode: 0o755 });
-  await mkdir('./public', { recursive: true, mode: 0o755 });
+  await mkdir('./downloads', {
+    recursive: true,
+    mode: 0o755
+  });
+  await mkdir('./public', {
+    recursive: true,
+    mode: 0o755
+  });
 
   const liveryPaths = await GetDirectories('./downloads');
 
   await AsyncForEach(liveryPaths, async (livDir, i) => {
-    return new Promise(fulfil => {
-      let archive = archiver('zip', {
-        zlib: { level: 9 }, // Sets the compression level.
-      });
-
-      console.log(chalk.grey.bold('='.repeat(60)));
-      console.log(chalk.blue.bold(CenterText(`Zipping livery (${i + 1} of ${liveryPaths.length})`)));
-      console.log(chalk.whiteBright(CenterText(`${livDir}.zip`)));
-      console.log();
-
-      if (existsSync(`public/${livDir}.zip`)) {
-        console.log(chalk.red.bold(CenterText('Archive already exists! Deleting...')));
-        unlinkSync(`public/${livDir}.zip`);
-        console.log(chalk.red.bold(CenterText('Deleted.')));
-        console.log();
-      }
-
-      console.log(chalk.bold(CenterText('Creating file stream...')));
-
-      const output = createWriteStream(`public/${livDir}.zip`, { autoClose: true });
-      archive.pipe(output);
-
-      console.log(chalk.bold(CenterText('Archiving...')));
-      console.log(chalk.grey(CenterText('This might take a while...')));
-
-      archive.directory(`downloads/${livDir}`, false).finalize();
-
-      output.on('finish', () => {
-        fulfil();
-      });
+    await mkdir(`./public/${livDir}`, {
+      recursive: true,
+      mode: 0o755
     });
+    const liveryPathsRaw = await GetDirectories(`./downloads/${livDir}`);
+    await AsyncForEach(liveryPathsRaw, async (livDirRaw, index) => {
+      return new Promise(fulfil => {
+        let archive = archiver('zip', {
+          zlib: {
+            level: 9
+          }, // Sets the compression level.
+        });
+
+        console.log(chalk.grey.bold('='.repeat(60)));
+        console.log(chalk.blue.bold(CenterText(`Zipping livery (${index + 1} of ${liveryPathsRaw.length})`)));
+        console.log(chalk.whiteBright(CenterText(`${livDirRaw}.zip`)));
+        console.log();
+
+        if (existsSync(`public/${livDir}/${livDirRaw}.zip`)) {
+          console.log(chalk.red.bold(CenterText('Archive already exists! Deleting...')));
+          unlinkSync(`public/${livDir}/${livDirRaw}.zip`);
+          console.log(chalk.red.bold(CenterText('Deleted.')));
+          console.log();
+        }
+
+        console.log(chalk.bold(CenterText('Creating file stream...')));
+
+        const output = createWriteStream(`public/${livDir}/${livDirRaw}.zip`, {
+          autoClose: true
+        });
+        archive.pipe(output);
+
+        console.log(chalk.bold(CenterText('Archiving...')));
+        console.log(chalk.grey(CenterText('This might take a while...')));
+
+        archive.directory(`downloads/${livDir}/${livDirRaw}`, false).finalize();
+
+        output.on('finish', () => {
+          fulfil();
+        });
+      });
+    })
+
   });
 
   console.log(chalk.grey.bold('='.repeat(60)));
