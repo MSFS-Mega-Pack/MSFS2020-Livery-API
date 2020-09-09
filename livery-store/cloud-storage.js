@@ -3,8 +3,9 @@
  */
 const bucketName = 'msfsliverypack';
 const fs = require('fs');
+require('dotenv').config();
 const checksum = require('checksum'),
-    cs = checksum('dshaw')
+    cs = checksum('dshaw');
 // const filename = 'Local file to upload, e.g. ./local/path/to/file.txt';
 
 // Imports the Google Cloud client library
@@ -12,8 +13,18 @@ const {
     Storage
 } = require('@google-cloud/storage');
 
+const projectId = process.env.PROJECT_ID_storage;
+const client_email = process.env.CLIENT_EMAIL_storage;
+const private_key = process.env.PRIVATE_KEY_storage.replace(/\\n/gm, '\n')
+
 // Creates a client
-const storage = new Storage();
+const storage = new Storage({
+    projectId,
+    credentials: {
+        client_email,
+        private_key
+    }
+});
 
 fs.readdir('./public', function (err, files) {
     //handling error
@@ -25,10 +36,11 @@ fs.readdir('./public', function (err, files) {
         // Do whatever you want to do with the file
         const metadataFile = await getMetadata(file);
         checksum.file(`./public/${file}`, async function (err, sum) {
-            if (!metadataFile.fileExists || cs != metadataFile.metadata.checkSum) {
-                console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.checkSum} | New: ${cs}`)
+            if (!metadataFile.fileExists || cs != metadataFile.metadata.metadata.checkSum) {
+                console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.metadata.checkSum} | New: ${cs}`)
                 await uploadFile(`./public/${file}`, cs);
             }
+            console.log(`${file}: Is the same: Old: ${metadataFile.metadata.metadata.checkSum} | New: ${cs}`)
         })
 
     });
@@ -64,8 +76,18 @@ async function getMetadata(filename) {
             .bucket(bucketName)
             .file(filename)
             .getMetadata();
-        return {fileExists: true, metadata};
+        return {
+            fileExists: true,
+            metadata
+        };
     } catch (error) {
-        return {fileExists: false, metadata: {checkSum: 0}}
+        return {
+            fileExists: false,
+            metadata: {
+                metadata: {
+                    checkSum: 0
+                }
+            }
+        }
     }
 }

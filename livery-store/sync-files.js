@@ -1,6 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
+require('dotenv').config();
 
 const LIVERY_DIR_IDS = ['1ZUYrsC71w21npqlKM8SXHMX2HReybZO_'];
 
@@ -12,11 +13,13 @@ const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
 const TOKEN_PATH = 'token.json';
 
 // Load client secrets from a local file.
-fs.readFile('credentials.json', (err, content) => {
-  if (err) return console.log('Error loading client secret file:', err);
-  // Authorize a client with credentials, then call the Google Drive API.
-  authorize(JSON.parse(content), listFiles);
-});
+// fs.readFile('credentials.json', (err, content) => {
+//   if (err) return console.log('Error loading client secret file:', err);
+//   // Authorize a client with credentials, then call the Google Drive API.
+//   authorize(JSON.parse(content), listFiles);
+// });
+//JUST DUMP EVERYTHING IN .ENV SO IT CAN BE USED IN BUILD
+authorize(JSON.parse(process.env.GDRIVE_JSON), listFiles)
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
