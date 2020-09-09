@@ -270,7 +270,7 @@ async function RecursiveDownload(files, currentPath) {
           });
         }
       }
-    }, index * 1 * 1000);
+    }, index * 5 * 1000);
   });
 
 }
