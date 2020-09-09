@@ -3,6 +3,8 @@
  */
 const bucketName = 'msfsliverypack';
 const fs = require('fs');
+const checksum = require('checksum'),
+    cs = checksum('dshaw')
 // const filename = 'Local file to upload, e.g. ./local/path/to/file.txt';
 
 // Imports the Google Cloud client library
@@ -21,13 +23,20 @@ fs.readdir('./public', function (err, files) {
     //listing all files using forEach
     files.forEach(async function (file) {
         // Do whatever you want to do with the file
-        console.log(file);
-       await uploadFile(`./public/${file}`)
+        const metadataFile = await getMetadata(file);
+        checksum.file(`./public/${file}`, async function (err, sum) {
+            if (!metadataFile.fileExists || cs != metadataFile.metadata.checkSum) {
+                console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.checkSum} | New: ${cs}`)
+                await uploadFile(`./public/${file}`, cs);
+            }
+        })
+
     });
-    return console.log('Done!')
 });
 
-async function uploadFile(filename) {
+async function uploadFile(filename, cs) {
+    let fileRawName = filename.substring(filename.lastIndexOf('/') + 1);
+    await getMetadata(fileRawName)
     // Uploads a local file to the bucket
     await storage.bucket(bucketName).upload(filename, {
         // Support for HTTP requests made with `Accept-Encoding: gzip`
@@ -39,8 +48,24 @@ async function uploadFile(filename) {
             // Use only if the contents of the file will never change
             // (If the contents will change, use cacheControl: 'no-cache')
             cacheControl: 'public, max-age=31536000',
+            metadata: {
+                checkSum: cs
+            }
         },
     });
 
     console.log(`${filename} uploaded to ${bucketName}.`);
+}
+
+async function getMetadata(filename) {
+    // Gets the metadata for the file
+    try {
+        const [metadata] = await storage
+            .bucket(bucketName)
+            .file(filename)
+            .getMetadata();
+        return {fileExists: true, metadata};
+    } catch (error) {
+        return {fileExists: false, metadata: {checkSum: 0}}
+    }
 }

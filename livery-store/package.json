@@ -7,16 +7,17 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "yarn sync && yarn zip && node -r dotenv/config cloud-storage.js && yarn clean",
+    "start": "yarn sync && yarn zip && node -r dotenv/config cloud-storage.js",
     "sync": "node .",
     "zip": "node zip.js",
-    "upload": "node cloud-storage.js",
-    "clean":"rm -r downloads/ public/"
+    "upload": "node -r dotenv/config cloud-storage.js",
+    "clean": "rm -r downloads/ public/"
   },
   "dependencies": {
     "@google-cloud/storage": "^5.3.0",
     "archiver": "^5.0.0",
     "chalk": "^4.1.0",
+    "checksum": "^0.1.1",
     "dotenv": "^8.2.0",
     "googleapis": "^59.0.0"
   }
