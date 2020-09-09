@@ -7,7 +7,7 @@ require('dotenv').config();
 
 //const LIVERY_DIR_IDS = ['1ZUYrsC71w21npqlKM8SXHMX2HReybZO_'];
 const LIVERY_DIR_IDS = [{
-    id: '1LP9_ty3_bKgvh-2uXZ3glagz2ukNLY0_',
+    id: '1hUOzK_B9APYLmbHGeFetQRkxuTPZ5kPu',
     name: "XCub Liveries"
   },
   {
