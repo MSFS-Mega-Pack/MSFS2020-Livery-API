@@ -32,7 +32,8 @@
     "express": "^4.17.1",
     "https": "^1.0.0",
     "node-fetch": "^2.6.1",
-    "octonode": "^0.9.5"
+    "octonode": "^0.9.5",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "pm2": "^4.4.1",
