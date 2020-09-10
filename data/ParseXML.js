@@ -29,7 +29,7 @@ if (process.env.PROJECT_ID_storage && process.env.CLIENT_EMAIL_storage && proces
  */
 async function getAllFiles(cache) {
     if (!CACHE_ENABLED || cache.data.baseManifests.cdnList === null || cache.data.baseManifests.cdnList.hasExpired) {
-        request('https://msfs-liverypack-cdn.mrproper.dev/', async function (error, response, body) {
+        await request('https://msfs-liverypack-cdn.mrproper.dev/', async function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 let result = convert.xml2js(body, {
                     ignoreComment: true,
@@ -38,6 +38,7 @@ async function getAllFiles(cache) {
                 let endVersion = [];
                 result = result.elements[0].elements
                 for (let i = 4; i < result.length; i++) {
+                    const checkSum = await (await getMetadata(result[i].elements[0].elements[0].text)).metadata.metadata.checkSum;
                     let AirplaneObject = {
                         airplane: result[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim(),
                         fileName: result[i].elements[0].elements[0].text,
@@ -46,15 +47,17 @@ async function getAllFiles(cache) {
                         lastModified: result[i].elements[3].elements[0].text,
                         ETag: result[i].elements[4].elements[0].text,
                         size: result[i].elements[5].elements[0].text,
-                        checkSum: await (await getMetadata(result[i].elements[0].elements[0].text)).metadata.metadata.checkSum
+                        checkSum: checkSum
                     };
-                    endVersion.push(AirplaneObject)
+                    endVersion.push(AirplaneObject);
                 }
+                console.log("Done caching")
                 cache.data.baseManifests.cdnList = new CacheItem(endVersion);
+                return [cache.data.baseManifests.cdnList, false];
             }
         });
     }
-    return cache.data.baseManifests.cdnList;
+    return [cache.data.baseManifests.cdnList, true];
 }
 async function getMetadata(filename) {
     if (!process.env.PROJECT_ID_storage || !process.env.CLIENT_EMAIL_storage || !process.env.PRIVATE_KEY_storage) {
@@ -97,4 +100,3 @@ async function getMetadata(filename) {
 module.exports = {
     getAllFiles: getAllFiles
 }
-getAllFiles();

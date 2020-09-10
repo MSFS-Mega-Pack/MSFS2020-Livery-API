@@ -26,6 +26,7 @@ app.set('etag', 'strong');
 
 app.get('/get/sourcelist', (req, res) => GetHandlers.SourceList(req, res, ActiveCache));
 app.get('/get/allaircraft', (req, res) => GetHandlers.AllAircraft(req, res, ActiveCache));
+app.get('/get/allfiles', (req, res) => GetHandlers.AllFiles(req, res, ActiveCache));
 
 app.get('*', (req, res) => DefaultHandler(req, res, ActiveCache));
 
