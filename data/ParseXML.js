@@ -1,11 +1,14 @@
-const request = require('request');
+const { default: fetch } = require('node-fetch');
 const convert = require('xml-js');
-const bucketName = 'msfsliverypack';
 const CacheItem = require('../Cache/CacheItem');
 const { CACHE_ENABLED } = require('../Constants');
-require('dotenv').config();
 const { Storage } = require('@google-cloud/storage');
+const { response } = require('express');
+
+require('dotenv').config();
+const bucketName = 'msfsliverypack';
 let storage;
+
 if (process.env.PROJECT_ID_storage && process.env.CLIENT_EMAIL_storage && process.env.PRIVATE_KEY_storage) {
   const projectId = process.env.PROJECT_ID_storage;
   const client_email = process.env.CLIENT_EMAIL_storage;
@@ -25,33 +28,36 @@ if (process.env.PROJECT_ID_storage && process.env.CLIENT_EMAIL_storage && proces
  */
 async function getAllFiles(cache) {
   if (!CACHE_ENABLED || cache.data.baseManifests.cdnList === null || cache.data.baseManifests.cdnList.hasExpired) {
-    await request('https://msfs-liverypack-cdn.mrproper.dev/', async function (error, response, body) {
-      if (!error && response.statusCode == 200) {
-        let result = convert.xml2js(body, {
-          ignoreComment: true,
-          alwaysChildren: true,
-        });
-        let endVersion = [];
-        result = result.elements[0].elements;
-        for (let i = 4; i < result.length; i++) {
-          const checkSum = await (await getMetadata(result[i].elements[0].elements[0].text)).metadata.metadata.checkSum;
-          let AirplaneObject = {
-            airplane: result[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim(),
-            fileName: result[i].elements[0].elements[0].text,
-            generation: result[i].elements[1].elements[0].text,
-            metaGeneration: result[i].elements[2].elements[0].text,
-            lastModified: result[i].elements[3].elements[0].text,
-            ETag: result[i].elements[4].elements[0].text,
-            size: result[i].elements[5].elements[0].text,
-            checkSum: checkSum,
-          };
-          endVersion.push(AirplaneObject);
-        }
-        console.log('Done caching');
-        cache.data.baseManifests.cdnList = new CacheItem(endVersion);
-        return [cache.data.baseManifests.cdnList, false];
+    const response = await fetch('https://msfs-liverypack-cdn.mrproper.dev/');
+
+    if (response.ok) {
+      const parsedResponse = convert.xml2js(await response.text(), {
+        ignoreComment: true,
+        alwaysChildren: true,
+      });
+
+      let endVersion = [];
+      const allResults = parsedResponse.elements[0].elements;
+
+      for (let i = 4; i < allResults.length; i++) {
+        const checkSum = await (await getMetadata(allResults[i].elements[0].elements[0].text)).metadata.metadata.checkSum;
+        let AirplaneObject = {
+          airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim(),
+          fileName: allResults[i].elements[0].elements[0].text,
+          generation: allResults[i].elements[1].elements[0].text,
+          metaGeneration: allResults[i].elements[2].elements[0].text,
+          lastModified: allResults[i].elements[3].elements[0].text,
+          ETag: allResults[i].elements[4].elements[0].text,
+          size: allResults[i].elements[5].elements[0].text,
+          checkSum: checkSum,
+        };
+        endVersion.push(AirplaneObject);
       }
-    });
+
+      console.log('Done caching');
+      cache.data.baseManifests.cdnList = new CacheItem(endVersion);
+      return [cache.data.baseManifests.cdnList, false];
+    }
   }
   return [cache.data.baseManifests.cdnList, true];
 }
@@ -69,7 +75,7 @@ async function getMetadata(filename) {
   // Gets the metadata for the file
   try {
     const [metadata] = await storage.bucket(bucketName).file(filename).getMetadata();
-    if (metadata.metadata == undefined)
+    if (typeof metadata.metadata === 'undefined')
       metadata = {
         metadata: {
           checkSum: 0,
