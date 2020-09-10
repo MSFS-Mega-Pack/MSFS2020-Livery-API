@@ -37,3 +37,7 @@ Log(`Starting API listener...`, Log.SEVERITY.DEBUG);
 let listener = app.listen(port || 8080, () => {
   Log(`Listening at localhost:${listener.address().port}`, Log.SEVERITY.INFO);
 });
+
+if (!Constants.CACHE_ENABLED) {
+  Log(`Caching is disabled! This better not be in prod...`, Log.SEVERITY.WARNING)
+}
