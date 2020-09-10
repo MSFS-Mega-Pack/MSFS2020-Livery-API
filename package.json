@@ -26,6 +26,7 @@
     "logs": "pm2 logs \"MSFS 2020 Livery API\""
   },
   "dependencies": {
+    "@google-cloud/storage": "^5.3.0",
     "chalk": "^4.1.0",
     "dotenv": "^8.2.0",
     "eslint": "^7.8.1",
