@@ -1,5 +1,6 @@
 const ParseXML = require('../../data/ParseXML');
 const SendResponse = require('../../helpers/SendResponse');
+const Log = require('../../logger');
 
 /**
  * @param {import('express').Request} req
