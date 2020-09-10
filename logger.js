@@ -24,24 +24,24 @@ function Log(message, severity = SEVERITY.INFO) {
 
   switch (sev) {
     case SEVERITY.ERROR:
-      sevColor = chalk.bgRed;
-      type = 'ERROR';
+      sevColor = chalk.bgRedBright.black;
+      type = ' ERROR';
       break;
 
     case SEVERITY.WARNING:
-      sevColor = chalk.bgYellow;
+      sevColor = chalk.bgYellow.black;
       type = 'WARNING';
       break;
 
     default:
     case SEVERITY.INFO:
-      sevColor = chalk.bgBlue;
-      type = 'INFO';
+      sevColor = chalk.bgBlue.white;
+      type = '  INFO ';
       break;
 
     case SEVERITY.DEBUG:
-      sevColor = chalk.bgGrey;
-      type = 'DEBUG';
+      sevColor = chalk.bgWhite.black;
+      type = ' DEBUG ';
       break;
   }
 
