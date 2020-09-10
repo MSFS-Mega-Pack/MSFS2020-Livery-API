@@ -37,7 +37,3 @@ Log(`Starting API listener...`, Log.SEVERITY.DEBUG);
 let listener = app.listen(port || 8080, () => {
   Log(`Listening at localhost:${listener.address().port}`, Log.SEVERITY.INFO);
 });
-
-if (!env.GIT_TOKEN || env.GIT_TOKEN === 'GIT ACCESS TOKEN') {
-  Log(`No GitHub token specified!`, Log.SEVERITY.ERROR);
-}
