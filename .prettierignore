@@ -1,1 +1,7 @@
 node_modules/
+
+livery-store/downloads
+livery-store/public
+livery-store/node_modules
+livery-store/credentials.json
+livery-store/token.json
