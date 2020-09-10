@@ -39,7 +39,7 @@ async function getAllFiles(cache) {
                 result = result.elements[0].elements
                 for (let i = 4; i < result.length; i++) {
                     let AirplaneObject = {
-                        airplane: result[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0],
+                        airplane: result[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim(),
                         fileName: result[i].elements[0].elements[0].text,
                         generation: result[i].elements[1].elements[0].text,
                         metaGeneration: result[i].elements[2].elements[0].text,
