@@ -6,11 +6,16 @@ const SendResponse = require('../../helpers/SendResponse');
  * @param {import('express').Response} res
  */
 async function Get_AllItems(req, res, cache) {
+  Log(`Getting all livery zips...`, Log.SEVERITY.DEBUG);
+
   /**
    * @type {[import('../../Cache/CacheItem'), boolean]}
    */
   const [cacheItem, cached] = await ParseXML.getAllFiles(cache);
-  console.log(cacheItem)
+
+  console.log(cacheItem);
+  cached && Log(`Livery zip list was cached! Woohoo!`, Log.SEVERITY.DEBUG);
+
   return SendResponse.JSON(res, cacheItem.data, cached, cacheItem.cachedAt);
 }
 
