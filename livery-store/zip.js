@@ -1,16 +1,7 @@
 const archiver = require('archiver');
 
-const {
-  readdir,
-  stat,
-  mkdir,
-  unlink
-} = require('fs').promises;
-const {
-  createWriteStream,
-  existsSync,
-  unlinkSync
-} = require('fs');
+const { readdir, stat, mkdir, unlink } = require('fs').promises;
+const { createWriteStream, existsSync, unlinkSync } = require('fs');
 
 const chalk = require('chalk');
 
@@ -20,11 +11,11 @@ const GetDirectories = async (path = '.') =>
 async function Main() {
   await mkdir('./downloads', {
     recursive: true,
-    mode: 0o755
+    mode: 0o755,
   });
   await mkdir('./public', {
     recursive: true,
-    mode: 0o755
+    mode: 0o755,
   });
 
   const liveryPaths = await GetDirectories('./downloads');
@@ -32,14 +23,14 @@ async function Main() {
   await AsyncForEach(liveryPaths, async (livDir, i) => {
     await mkdir(`./public/${livDir}`, {
       recursive: true,
-      mode: 0o755
+      mode: 0o755,
     });
     const liveryPathsRaw = await GetDirectories(`./downloads/${livDir}`);
     await AsyncForEach(liveryPathsRaw, async (livDirRaw, index) => {
       return new Promise(fulfil => {
         let archive = archiver('zip', {
           zlib: {
-            level: 9
+            level: 9,
           }, // Sets the compression level.
         });
 
@@ -58,7 +49,7 @@ async function Main() {
         console.log(chalk.bold(CenterText('Creating file stream...')));
 
         const output = createWriteStream(`public/${livDir}/${livDirRaw}.zip`, {
-          autoClose: true
+          autoClose: true,
         });
         archive.pipe(output);
 
@@ -71,8 +62,7 @@ async function Main() {
           fulfil();
         });
       });
-    })
-
+    });
   });
 
   console.log(chalk.grey.bold('='.repeat(60)));

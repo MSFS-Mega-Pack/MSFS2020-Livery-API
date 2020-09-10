@@ -1,4 +1,4 @@
 module.exports = {
   SourceList: require('./SourceList'),
-  AllFiles: require('./AllFiles')
+  AllFiles: require('./AllFiles'),
 };

@@ -2,7 +2,7 @@ let Cache = {
   data: {
     baseManifests: {
       sourceList: null,
-      cdnList: null
+      cdnList: null,
     },
   },
 };

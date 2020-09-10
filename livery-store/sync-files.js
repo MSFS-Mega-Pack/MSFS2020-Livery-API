@@ -1,76 +1,75 @@
 const fs = require('fs');
 const readline = require('readline');
-const {
-  google
-} = require('googleapis');
+const { google } = require('googleapis');
 require('dotenv').config();
 
 //const LIVERY_DIR_IDS = ['1ZUYrsC71w21npqlKM8SXHMX2HReybZO_'];
-const LIVERY_DIR_IDS = [{
+const LIVERY_DIR_IDS = [
+  {
     id: '1hUOzK_B9APYLmbHGeFetQRkxuTPZ5kPu',
-    name: "XCub Liveries"
+    name: 'XCub Liveries',
   },
   {
     id: '1z7vQjoBoRxaZkdhUFh6yvIXZaqF1VdtA',
-    name: "TBM 930"
+    name: 'TBM 930',
   },
   {
     id: '1ygf1FRyOz5_PMt5vin0ahzj9CWp-us6b',
-    name: "Savage Club Liveries"
+    name: 'Savage Club Liveries',
   },
   {
     id: '1sWRiBdfy7OfhMscwal5VDIFjAtvdwnst',
-    name: "Pitts Special Liveries"
+    name: 'Pitts Special Liveries',
   },
   {
     id: '1-FyQBAqHrthDNp7JjCJ-44K50CieylKu',
-    name: "KingAir 350 Liveries"
+    name: 'KingAir 350 Liveries',
   },
   {
     id: '1i_Pi_VDZ1w_WxrfbkKtJrQWgZa3iymha',
-    name: "Icon A5 Liveries"
+    name: 'Icon A5 Liveries',
   },
   {
     id: '1_dS0RSwIZP1NKIOS9Z0VavU4CgatacBR',
-    name: "E330 Liveries"
+    name: 'E330 Liveries',
   },
   {
     id: '16golf_KPeQ8NFDrzr_OKxdjL37WQCIq1',
-    name: "DA62 Liveries"
+    name: 'DA62 Liveries',
   },
   {
     id: '1j9uOJmjakWrBr79Cp_v6lWi-oEm-KCnB',
-    name: "DA40 Liveries"
+    name: 'DA40 Liveries',
   },
   {
     id: '12suV_qD_-sJVrGD5RnockH2OuTMuPBs5',
-    name: "CJ4 Liveries"
+    name: 'CJ4 Liveries',
   },
   {
     id: '1RyvOFpPlgwmxZrPuiJxSjaLY_vbW0MWX',
-    name: "Cessna 208b Liveries"
+    name: 'Cessna 208b Liveries',
   },
   {
     id: '1Y4c1L73NT5BkXHeKwq-Q_TJRbAzGGkEJ',
-    name: "Cessna 172sp Liveries"
+    name: 'Cessna 172sp Liveries',
   },
   {
     id: '11iF9QjotyQ6LU-3qHsPaRlDjVCNeuSVL',
-    name: "Cessna 152 Liveries"
+    name: 'Cessna 152 Liveries',
   },
   {
     id: '1eHdM9g8wN-TLxVgLBLolVR413QGhHxa8',
-    name: "A320 Liveries"
+    name: 'A320 Liveries',
   },
   {
     id: '1qFjj3287Q3gUshUieTXxm3eYLp95zxoF',
-    name: "787 Liveries"
+    name: '787 Liveries',
   },
   {
     id: '19wo1wrGY3qVqgVO8PSzPMTHNCnMj3cWx',
-    name: "747 Liveries"
-  }
-]
+    name: '747 Liveries',
+  },
+];
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
@@ -85,7 +84,7 @@ const TOKEN_PATH = 'token.json';
 //   authorize(JSON.parse(content), listFiles);
 // });
 //JUST DUMP EVERYTHING IN .ENV SO IT CAN BE USED IN BUILD
-authorize(JSON.parse(process.env.GDRIVE_JSON), listFiles)
+authorize(JSON.parse(process.env.GDRIVE_JSON), listFiles);
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
@@ -94,11 +93,7 @@ authorize(JSON.parse(process.env.GDRIVE_JSON), listFiles)
  * @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
-  const {
-    client_secret,
-    client_id,
-    redirect_uris
-  } = credentials.installed;
+  const { client_secret, client_id, redirect_uris } = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
   // Check if we have previously stored a token.
@@ -149,7 +144,7 @@ let drive;
 async function listFiles(auth) {
   drive = google.drive({
     version: 'v3',
-    auth
+    auth,
   });
   LIVERY_DIR_IDS.forEach(async function (liveryFolder, index) {
     setTimeout(async function () {
@@ -166,7 +161,7 @@ async function listFiles(auth) {
         console.log('No files found.');
       }
     }, index * 100 * 1000);
-  })
+  });
 }
 
 /**
@@ -208,13 +203,16 @@ async function RecursiveDownload(files, currentPath) {
 
         let result;
         try {
-          result = await drive.files.get({
-            fileId: file.id,
-            alt: 'media',
-            // acknowledgeAbuse: true,
-          }, {
-            responseType: 'stream'
-          });
+          result = await drive.files.get(
+            {
+              fileId: file.id,
+              alt: 'media',
+              // acknowledgeAbuse: true,
+            },
+            {
+              responseType: 'stream',
+            }
+          );
         } catch {
           // is a text file!
           text = true;
@@ -222,7 +220,7 @@ async function RecursiveDownload(files, currentPath) {
 
         await fs.promises.mkdir(currentPath, {
           recursive: true,
-          mode: 0o755
+          mode: 0o755,
         });
 
         if (!text) {
@@ -245,12 +243,15 @@ async function RecursiveDownload(files, currentPath) {
         } else {
           console.log(`Is text: ${file.name} (ID: ${file.id})`);
 
-          result = await drive.files.export({
-            fileId: file.id,
-            mimeType: 'text/plain',
-          }, {
-            responseType: 'stream'
-          });
+          result = await drive.files.export(
+            {
+              fileId: file.id,
+              mimeType: 'text/plain',
+            },
+            {
+              responseType: 'stream',
+            }
+          );
 
           await new Promise((resolve, reject) => {
             var dest = fs.createWriteStream(`${currentPath}/${file.name}`);
@@ -272,5 +273,4 @@ async function RecursiveDownload(files, currentPath) {
       }
     }, index * 5 * 1000);
   });
-
 }
