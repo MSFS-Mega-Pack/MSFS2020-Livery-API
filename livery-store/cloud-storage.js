@@ -75,7 +75,7 @@ async function getMetadata(filename) {
   // Gets the metadata for the file
   try {
     const [metadata] = await storage.bucket(bucketName).file(filename).getMetadata();
-    if (metadata.metadata == undefined)
+    if (typeof metadata.metadata === 'undefined')
       metadata = {
         metadata: {
           checkSum: 0,
