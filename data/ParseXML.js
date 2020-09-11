@@ -1,18 +1,9 @@
-const {
-  default: fetch
-} = require('node-fetch');
+const { default: fetch } = require('node-fetch');
 const convert = require('xml-js');
 const CacheItem = require('../Cache/CacheItem');
-const {
-  CACHE_ENABLED,
-  CDN_URL
-} = require('../Constants');
-const {
-  Storage
-} = require('@google-cloud/storage');
-const {
-  response
-} = require('express');
+const { CACHE_ENABLED, CDN_URL } = require('../Constants');
+const { Storage } = require('@google-cloud/storage');
+const { response } = require('express');
 
 require('dotenv').config();
 const bucketName = 'msfsliverypack';
@@ -51,26 +42,27 @@ async function getAllFiles(cache) {
       const allResults = parsedResponse.elements[0].elements;
 
       for (let i = 4; i < allResults.length; i++) {
-        const metadataObject = metadataArray.findByValueOfObject("name", allResults[i].elements[0].elements[0].text);
-        let checkSum = 0;
-        let image = 0;
-        let smallImage = 0;
+        const metadataObject = metadataArray.findByValueOfObject('name', allResults[i].elements[0].elements[0].text);
+
+        let checkSum, image, smallImage;
+
         if (metadataArray.length > 0 && typeof metadataObject[0] !== 'undefined') {
           checkSum = metadataObject[0].metadata.checkSum;
-          image = `${CDN_URL}/${metadataObject[0].metadata.Image}`
-          smallImage = `${CDN_URL}/${metadataObject[0].metadata.smallImage}`
+          image = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.Image}`);
+          smallImage = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.smallImage}`);
         }
+
         let AirplaneObject = {
-          airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim(),
-          fileName: allResults[i].elements[0].elements[0].text,
-          generation: allResults[i].elements[1].elements[0].text,
-          metaGeneration: allResults[i].elements[2].elements[0].text,
-          lastModified: allResults[i].elements[3].elements[0].text,
-          ETag: allResults[i].elements[4].elements[0].text,
-          size: allResults[i].elements[5].elements[0].text,
-          checkSum: checkSum,
-          image: image,
-          smallImage: smallImage
+          airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim() || null,
+          fileName: allResults[i].elements[0].elements[0].text || null,
+          generation: allResults[i].elements[1].elements[0].text || null,
+          metaGeneration: allResults[i].elements[2].elements[0].text || null,
+          lastModified: allResults[i].elements[3].elements[0].text || null,
+          ETag: allResults[i].elements[4].elements[0].text || null,
+          size: allResults[i].elements[5].elements[0].text || null,
+          checkSum: checkSum || null,
+          image: image || null,
+          smallImage: smallImage || null,
         };
         endVersion.push(AirplaneObject);
       }
@@ -95,9 +87,9 @@ async function getFilesFromStorage() {
     if (typeof file.metadata.metadata === 'undefined') {
       file.metadata = {
         metadata: {
-          checkSum: 0,
-          Image: 0,
-          smallImage: 0
+          checkSum: null,
+          image: null,
+          smallImage: null,
         },
       };
     }
@@ -113,6 +105,6 @@ module.exports = {
 
 Array.prototype.findByValueOfObject = function (key, value) {
   return this.filter(function (item) {
-    return (item[key] === value);
+    return item[key] === value;
   });
-}
+};
