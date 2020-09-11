@@ -44,23 +44,23 @@ async function Main() {
         // Do whatever you want to do with the file
         const metadataFile = await getMetadata(`${livDir}/${file}`);
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
-          //if (!metadataFile.fileExists || sum != metadataFile.metadata.metadata.checkSum) {
-          const thumbnails = await getThumbnail(livDir, file, sum);
-          console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.metadata.checkSum} | New: ${sum}`);
-          let uploadMetadata = {
-            checkSum: sum
-          }
-          if (thumbnails.length != 0) {
-            for (let i = 0; i < thumbnails.length; i++) {
-              if (thumbnails[i].toString().includes("small")) {
-                uploadMetadata.smallImage = thumbnails[i].toString();
-              }
-              uploadMetadata.Image = thumbnails[i].toString();
+          if (!metadataFile.fileExists || sum != metadataFile.metadata.metadata.checkSum) {
+            const thumbnails = await getThumbnail(livDir, file, sum);
+            console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.metadata.checkSum} | New: ${sum}`);
+            let uploadMetadata = {
+              checkSum: sum
             }
+            if (thumbnails.length != 0) {
+              for (let i = 0; i < thumbnails.length; i++) {
+                if (thumbnails[i].toString().includes("small")) {
+                  uploadMetadata.smallImage = thumbnails[i].toString();
+                }
+                uploadMetadata.Image = thumbnails[i].toString();
+              }
+            }
+            uploadFile(`./public/${livDir}/${file}`,
+              uploadMetadata, `${livDir}/${file}`);
           }
-          uploadFile(`./public/${livDir}/${file}`,
-            uploadMetadata, `${livDir}/${file}`);
-          // }
         });
       });
     });
