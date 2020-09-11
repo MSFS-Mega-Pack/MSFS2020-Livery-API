@@ -44,7 +44,6 @@ async function Main() {
         // Do whatever you want to do with the file
         const metadataFile = await getMetadata(`${livDir}/${file}`);
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
-          const thumbnails = await getThumbnail(livDir, file, sum);
           if (!metadataFile.fileExists || sum != metadataFile.metadata.metadata.checkSum) {
             const thumbnails = await getThumbnail(livDir, file, sum);
             console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.metadata.checkSum} | New: ${sum}`);
