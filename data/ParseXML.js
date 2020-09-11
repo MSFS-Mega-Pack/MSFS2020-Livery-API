@@ -1,9 +1,18 @@
-const { default: fetch } = require('node-fetch');
+const {
+  default: fetch
+} = require('node-fetch');
 const convert = require('xml-js');
 const CacheItem = require('../Cache/CacheItem');
-const { CACHE_ENABLED, CDN_URL } = require('../Constants');
-const { Storage } = require('@google-cloud/storage');
-const { response } = require('express');
+const {
+  CACHE_ENABLED,
+  CDN_URL
+} = require('../Constants');
+const {
+  Storage
+} = require('@google-cloud/storage');
+const {
+  response
+} = require('express');
 const Constants = require('../Constants');
 
 require('dotenv').config();
@@ -41,35 +50,39 @@ async function getAllFiles(cache) {
       const metadataArray = await getFilesFromStorage();
       let fileListing = [];
       const allResults = parsedResponse.elements[0].elements;
+      for (let i = 0; i < allResults.length; i++) {
+        if (allResults[i].name == 'Contents') {
+          const metadataObject = metadataArray.findByValueOfObject('name', allResults[i].elements[0].elements[0].text);
 
-      for (let i = 4; i < allResults.length; i++) {
-        const metadataObject = metadataArray.findByValueOfObject('name', allResults[i].elements[0].elements[0].text);
+          let checkSum, image, smallImage;
 
-        let checkSum, image, smallImage;
+          if (metadataArray.length > 0 && typeof metadataObject[0] !== 'undefined') {
+            checkSum = metadataObject[0].metadata.checkSum;
+            image = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.Image}`);
+            smallImage = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.smallImage}`);
+          }
 
-        if (metadataArray.length > 0 && typeof metadataObject[0] !== 'undefined') {
-          checkSum = metadataObject[0].metadata.checkSum;
-          image = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.Image}`);
-          smallImage = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.smallImage}`);
+          let AirplaneObject = {
+            airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim() || null,
+            fileName: allResults[i].elements[0].elements[0].text || null,
+            generation: allResults[i].elements[1].elements[0].text || null,
+            metaGeneration: allResults[i].elements[2].elements[0].text || null,
+            lastModified: allResults[i].elements[3].elements[0].text || null,
+            ETag: allResults[i].elements[4].elements[0].text || null,
+            size: allResults[i].elements[5].elements[0].text || null,
+            checkSum: checkSum || null,
+            image: image || null,
+            smallImage: smallImage || null,
+          };
+
+          fileListing.push(AirplaneObject);
         }
-
-        let AirplaneObject = {
-          airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim() || null,
-          fileName: allResults[i].elements[0].elements[0].text || null,
-          generation: allResults[i].elements[1].elements[0].text || null,
-          metaGeneration: allResults[i].elements[2].elements[0].text || null,
-          lastModified: allResults[i].elements[3].elements[0].text || null,
-          ETag: allResults[i].elements[4].elements[0].text || null,
-          size: allResults[i].elements[5].elements[0].text || null,
-          checkSum: checkSum || null,
-          image: image || null,
-          smallImage: smallImage || null,
-        };
-
-        fileListing.push(AirplaneObject);
       }
 
-      cache.data.baseManifests.cdnFileListing = new CacheItem({ cdnBaseUrl: Constants.CDN_URL, fileList: fileListing });
+      cache.data.baseManifests.cdnFileListing = new CacheItem({
+        cdnBaseUrl: Constants.CDN_URL,
+        fileList: fileListing
+      });
       return [cache.data.baseManifests.cdnFileListing, false];
     }
   }
@@ -86,16 +99,18 @@ async function getFilesFromStorage() {
   let [files] = await storage.bucket(bucketName).getFiles();
   let temparray = [];
   await files.forEach(file => {
-    if (typeof file.metadata.metadata === 'undefined') {
-      file.metadata = {
-        metadata: {
-          checkSum: null,
-          image: null,
-          smallImage: null,
-        },
-      };
+    if (!file.name.toString().startsWith("img")) {
+      if (typeof file.metadata.metadata === 'undefined') {
+        file.metadata = {
+          metadata: {
+            checkSum: null,
+            image: null,
+            smallImage: null,
+          },
+        };
+      }
+      temparray.push(file.metadata);
     }
-    temparray.push(file.metadata);
   });
   files = temparray;
   return files;
