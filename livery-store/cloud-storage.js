@@ -44,11 +44,13 @@ async function Main() {
         // Do whatever you want to do with the file
         const metadataFile = await getMetadata(`${livDir}/${file}`);
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
-          if (!metadataFile.fileExists || sum != metadataFile.metadata.metadata.checkSum) {
+         // if (!metadataFile.fileExists || sum != metadataFile.metadata.metadata.checkSum) {
             const thumbnails = await getThumbnail(livDir, file, sum);
             console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.metadata.checkSum} | New: ${sum}`);
             let uploadMetadata = {
-              checkSum: sum
+              checkSum: sum,
+              smallImage: 0,
+              Image: 0
             }
             if (thumbnails.length != 0) {
               for (let i = 0; i < thumbnails.length; i++) {
@@ -60,7 +62,7 @@ async function Main() {
             }
             uploadFile(`./public/${livDir}/${file}`,
               uploadMetadata, `${livDir}/${file}`);
-          }
+          //}
         });
       });
     });
@@ -76,8 +78,14 @@ async function getThumbnail(liveryType, liveryName, sum) {
   let directories = await GetDirectories(dir);
   dir += `/${directories[0]}`;
   directories = await GetDirectories(dir);
-  let smallImage = dir + `/${directories[2]}/thumbnail_small.JPG`;
-  dir += `/${directories[2]}/thumbnail.JPG`;
+  for (let i = 0; i < directories.length; i++) {
+    if (directories[i].includes("TEXTURE.")) {
+      directories = directories[i];
+      break;
+    }
+  }
+  let smallImage = dir + `/${directories}/thumbnail_small.JPG`;
+  dir += `/${directories}/thumbnail.JPG`;
   if (fs.existsSync(dir)) {
     uploadFile(dir, {
       checkSum: sum
