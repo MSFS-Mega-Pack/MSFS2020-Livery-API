@@ -39,5 +39,5 @@ let listener = app.listen(port || 8080, () => {
 });
 
 if (!Constants.CACHE_ENABLED) {
-  Log(`Caching is disabled! This better not be in prod...`, Log.SEVERITY.WARNING)
+  Log(`Caching is disabled! This better not be in prod...`, Log.SEVERITY.WARNING);
 }

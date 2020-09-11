@@ -3,21 +3,14 @@
  */
 const bucketName = 'msfsliverypack';
 const fs = require('fs');
-const {
-  readdir,
-  stat,
-  mkdir,
-  unlink
-} = require('fs').promises;
+const { readdir, stat, mkdir, unlink } = require('fs').promises;
 require('dotenv').config();
 let checksum = require('checksum');
 cs = checksum('dshaw');
 // const filename = 'Local file to upload, e.g. ./local/path/to/file.txt';
 
 // Imports the Google Cloud client library
-const {
-  Storage
-} = require('@google-cloud/storage');
+const { Storage } = require('@google-cloud/storage');
 
 const projectId = process.env.PROJECT_ID_storage;
 const client_email = process.env.CLIENT_EMAIL_storage;
@@ -50,19 +43,18 @@ async function Main() {
             let uploadMetadata = {
               checkSum: sum,
               smallImage: 0,
-              Image: 0
-            }
+              Image: 0,
+            };
             if (thumbnails.length != 0) {
               for (let i = 0; i < thumbnails.length; i++) {
-                if (thumbnails[i].toString().includes("small")) {
+                if (thumbnails[i].toString().includes('small')) {
                   uploadMetadata.smallImage = thumbnails[i].toString();
                 } else {
                   uploadMetadata.Image = thumbnails[i].toString();
                 }
               }
             }
-            uploadFile(`./public/${livDir}/${file}`,
-              uploadMetadata, `${livDir}/${file}`);
+            uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
           }
         });
       });
@@ -80,7 +72,7 @@ async function getThumbnail(liveryType, liveryName, sum) {
   dir += `/${directories[0]}`;
   directories = await GetDirectories(dir);
   for (let i = 0; i < directories.length; i++) {
-    if (directories[i].includes("TEXTURE.")) {
+    if (directories[i].includes('TEXTURE.')) {
       directories = directories[i];
       break;
     }
@@ -88,16 +80,24 @@ async function getThumbnail(liveryType, liveryName, sum) {
   let smallImage = dir + `/${directories}/thumbnail_small.JPG`;
   dir += `/${directories}/thumbnail.JPG`;
   if (fs.existsSync(dir)) {
-    uploadFile(dir, {
-      checkSum: sum
-    }, `img/${liveryType}/${liveryName}.JPG`);
-    result.push(`img/${liveryType}/${liveryName}.JPG`)
+    uploadFile(
+      dir,
+      {
+        checkSum: sum,
+      },
+      `img/${liveryType}/${liveryName}.JPG`
+    );
+    result.push(`img/${liveryType}/${liveryName}.JPG`);
   }
   if (fs.existsSync(smallImage)) {
-    uploadFile(smallImage, {
-      checkSum: sum
-    }, `img/${liveryType}/${liveryName}_small.JPG`);
-    result.push(`img/${liveryType}/${liveryName}_small.JPG`)
+    uploadFile(
+      smallImage,
+      {
+        checkSum: sum,
+      },
+      `img/${liveryType}/${liveryName}_small.JPG`
+    );
+    result.push(`img/${liveryType}/${liveryName}_small.JPG`);
   }
   return result;
 }
@@ -116,7 +116,7 @@ async function uploadFile(sourceDirectory, metadata, Destdirectory) {
       // Use only if the contents of the file will never change
       // (If the contents will change, use cacheControl: 'no-cache')
       cacheControl: 'public, max-age=31536000',
-      metadata
+      metadata,
     },
   });
 

@@ -5,5 +5,5 @@ module.exports = Object.freeze({
   CACHE_TTL: 1000 * 60 * 5,
   GIT_RAW_URL: `https://raw.githubusercontent.com/${env.REPO_NAME}/master`,
   CACHE_ENABLED: true,
-  CDN_URL: `https://msfs-liverypack-cdn.mrproper.dev`
+  CDN_URL: `https://msfs-liverypack-cdn.mrproper.dev`,
 });
