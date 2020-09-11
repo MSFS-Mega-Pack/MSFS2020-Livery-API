@@ -5,6 +5,7 @@ const Log = require('../../logger');
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
+ * @param {import('../Cache/Cache').ActiveCache} cache Active cache
  */
 async function Get_SourceList(req, res, cache) {
   Log(`Getting SourceList...`, Log.SEVERITY.DEBUG);

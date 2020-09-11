@@ -5,6 +5,7 @@ const Log = require('../../logger');
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
+ * @param {import('../Cache/Cache').ActiveCache} cache Active cache
  */
 async function Get_AllItems(req, res, cache) {
   Log(`Getting all livery zips...`, Log.SEVERITY.DEBUG);

@@ -30,9 +30,11 @@ if (process.env.PROJECT_ID_storage && process.env.CLIENT_EMAIL_storage && proces
     },
   });
 }
-// Creates a client
 /**
  * Get JSON object with all files availible on the server
+ *
+ * @param {import('../Cache/Cache').ActiveCache} cache Active cache
+ *
  * @return {Object} JSON object
  */
 async function getAllFiles(cache) {
