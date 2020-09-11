@@ -1,9 +1,17 @@
-const { default: fetch } = require('node-fetch');
+const {
+  default: fetch
+} = require('node-fetch');
 const convert = require('xml-js');
 const CacheItem = require('../Cache/CacheItem');
-const { CACHE_ENABLED } = require('../Constants');
-const { Storage } = require('@google-cloud/storage');
-const { response } = require('express');
+const {
+  CACHE_ENABLED
+} = require('../Constants');
+const {
+  Storage
+} = require('@google-cloud/storage');
+const {
+  response
+} = require('express');
 
 require('dotenv').config();
 const bucketName = 'msfsliverypack';
@@ -35,12 +43,16 @@ async function getAllFiles(cache) {
         ignoreComment: true,
         alwaysChildren: true,
       });
-
+      const metadataArray = await getFilesFromStorage();
       let endVersion = [];
       const allResults = parsedResponse.elements[0].elements;
 
       for (let i = 4; i < allResults.length; i++) {
-        const checkSum = await (await getMetadata(allResults[i].elements[0].elements[0].text)).metadata.metadata.checkSum;
+        const metadataObject = metadataArray.findByValueOfObject("name", allResults[i].elements[0].elements[0].text);
+        let checkSum = 0;
+        if (metadataArray.length > 0 && typeof metadataObject[0] !== 'undefined') {
+          checkSum = metadataObject[0].metadata.checkSum;
+        }
         let AirplaneObject = {
           airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim(),
           fileName: allResults[i].elements[0].elements[0].text,
@@ -54,49 +66,42 @@ async function getAllFiles(cache) {
         endVersion.push(AirplaneObject);
       }
 
-      console.log('Done caching');
       cache.data.baseManifests.cdnList = new CacheItem(endVersion);
       return [cache.data.baseManifests.cdnList, false];
     }
   }
   return [cache.data.baseManifests.cdnList, true];
 }
-async function getMetadata(filename) {
+/**
+ * Get all metadata from Google Storage, returns array, is empty when not logged in.
+ * @return {Object} JSON object
+ */
+async function getFilesFromStorage() {
   if (!process.env.PROJECT_ID_storage || !process.env.CLIENT_EMAIL_storage || !process.env.PRIVATE_KEY_storage) {
-    return {
-      fileExists: false,
-      metadata: {
-        metadata: {
-          checkSum: 0,
-        },
-      },
-    };
+    return [];
   }
-  // Gets the metadata for the file
-  try {
-    const [metadata] = await storage.bucket(bucketName).file(filename).getMetadata();
-    if (typeof metadata.metadata === 'undefined')
-      metadata = {
+  let [files] = await storage.bucket(bucketName).getFiles();
+  let temparray = [];
+  await files.forEach(file => {
+    if (typeof file.metadata.metadata === 'undefined') {
+      file.metadata = {
         metadata: {
           checkSum: 0,
         },
       };
-    return {
-      fileExists: true,
-      metadata,
-    };
-  } catch (error) {
-    return {
-      fileExists: false,
-      metadata: {
-        metadata: {
-          checkSum: 0,
-        },
-      },
-    };
-  }
+    }
+    temparray.push(file.metadata);
+  });
+  files = temparray;
+  return files;
 }
 
 module.exports = {
   getAllFiles: getAllFiles,
 };
+
+Array.prototype.findByValueOfObject = function (key, value) {
+  return this.filter(function (item) {
+    return (item[key] === value);
+  });
+}

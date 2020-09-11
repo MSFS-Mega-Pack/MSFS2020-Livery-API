@@ -14,7 +14,6 @@ async function Get_AllItems(req, res, cache) {
    */
   const [cacheItem, cached] = await ParseXML.getAllFiles(cache);
 
-  console.log(cacheItem);
   cached && Log(`Livery zip list was cached! Woohoo!`, Log.SEVERITY.DEBUG);
 
   return SendResponse.JSON(res, cacheItem.data, cached, cacheItem.cachedAt);
