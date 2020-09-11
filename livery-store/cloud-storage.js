@@ -3,14 +3,21 @@
  */
 const bucketName = 'msfsliverypack';
 const fs = require('fs');
-const { readdir, stat, mkdir, unlink } = require('fs').promises;
+const {
+  readdir,
+  stat,
+  mkdir,
+  unlink
+} = require('fs').promises;
 require('dotenv').config();
 let checksum = require('checksum');
 cs = checksum('dshaw');
 // const filename = 'Local file to upload, e.g. ./local/path/to/file.txt';
 
 // Imports the Google Cloud client library
-const { Storage } = require('@google-cloud/storage');
+const {
+  Storage
+} = require('@google-cloud/storage');
 
 const projectId = process.env.PROJECT_ID_storage;
 const client_email = process.env.CLIENT_EMAIL_storage;
@@ -37,9 +44,14 @@ async function Main() {
         // Do whatever you want to do with the file
         const metadataFile = await getMetadata(`${livDir}/${file}`);
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
+          const thumbnails = await getThumbnail(livDir, file, sum);
           if (!metadataFile.fileExists || sum != metadataFile.metadata.metadata.checkSum) {
             console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.metadata.checkSum} | New: ${sum}`);
-            uploadFile(`${file}`, sum, livDir);
+            uploadFile(`./public/${livDir}/${file}`, {
+              checkSum: sum,
+              thumbnails: thumbnails
+            }, `${livDir}/${file}`);
+            //getThumbnail(livDir, file, sum);
           } //else console.log(`${file}: Is the same: Old: ${metadataFile.metadata.metadata.checkSum} | New: ${sum}`)
         });
       });
@@ -47,12 +59,37 @@ async function Main() {
   });
 }
 
-async function uploadFile(filename, checkSum, directory) {
-  let fileRawName = filename.substring(filename.lastIndexOf('/') + 1);
-  await getMetadata(`${directory}/${filename}`);
+async function getThumbnail(liveryType, liveryName, sum) {
+  let result = [];
+  liveryName = liveryName.substring(liveryName.lastIndexOf('/') + 1).trim();
+  liveryName = liveryName.replace('.zip', '');
+  let dir = `./downloads/${liveryType}/${liveryName}/SimObjects/Airplanes`;
+  if (!fs.existsSync(dir)) return console.log(dir);
+  let directories = await GetDirectories(dir);
+  dir += `/${directories[0]}`;
+  directories = await GetDirectories(dir);
+  let smallImage = dir + `/${directories[2]}/thumbnail_small.JPG`;
+  dir += `/${directories[2]}/thumbnail.JPG`;
+  if (fs.existsSync(dir)) {
+    uploadFile(dir, {
+      checkSum: sum
+    }, `img/${liveryType}/${liveryName}.JPG`);
+    result.push(`img/${liveryType}/${liveryName}.JPG`)
+  }
+  if (fs.existsSync(smallImage)) {
+    uploadFile(smallImage, {
+      checkSum: sum
+    }, `img/${liveryType}/${liveryName}_small.JPG`);
+    result.push(`img/${liveryType}/${liveryName}_small.JPG`)
+  }
+  return result;
+}
+
+async function uploadFile(sourceDirectory, metadata, Destdirectory) {
+  await getMetadata(Destdirectory);
   // Uploads a local file to the bucket
-  await storage.bucket(bucketName).upload(`public/${directory}/${filename}`, {
-    destination: `${directory}/${filename}`,
+  await storage.bucket(bucketName).upload(sourceDirectory, {
+    destination: Destdirectory,
     // Support for HTTP requests made with `Accept-Encoding: gzip`
     gzip: true,
     // By setting the option `destination`, you can change the name of the
@@ -62,13 +99,11 @@ async function uploadFile(filename, checkSum, directory) {
       // Use only if the contents of the file will never change
       // (If the contents will change, use cacheControl: 'no-cache')
       cacheControl: 'public, max-age=31536000',
-      metadata: {
-        checkSum: checkSum,
-      },
+      metadata
     },
   });
 
-  console.log(`${filename} uploaded to ${bucketName}/${directory}.`);
+  console.log(`${sourceDirectory} uploaded to ${Destdirectory}.`);
 }
 
 async function getMetadata(filename) {
