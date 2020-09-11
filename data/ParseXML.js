@@ -53,29 +53,31 @@ async function getAllFiles(cache) {
       for (let i = 0; i < allResults.length; i++) {
         if (allResults[i].name == 'Contents') {
           const metadataObject = metadataArray.findByValueOfObject('name', allResults[i].elements[0].elements[0].text);
+          if (!allResults[i].elements[0].elements[0].text.startsWith('img')) {
 
-          let checkSum, image, smallImage;
+            let checkSum, image, smallImage;
 
-          if (metadataArray.length > 0 && typeof metadataObject[0] !== 'undefined') {
-            checkSum = metadataObject[0].metadata.checkSum;
-            image = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.Image}`);
-            smallImage = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.smallImage}`);
+            if (metadataArray.length > 0 && typeof metadataObject[0] !== 'undefined') {
+              checkSum = metadataObject[0].metadata.checkSum;
+              image = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.Image}`);
+              smallImage = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.smallImage}`);
+            }
+
+            let AirplaneObject = {
+              airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim() || null,
+              fileName: allResults[i].elements[0].elements[0].text || null,
+              generation: allResults[i].elements[1].elements[0].text || null,
+              metaGeneration: allResults[i].elements[2].elements[0].text || null,
+              lastModified: allResults[i].elements[3].elements[0].text || null,
+              ETag: allResults[i].elements[4].elements[0].text || null,
+              size: allResults[i].elements[5].elements[0].text || null,
+              checkSum: checkSum || null,
+              image: image || null,
+              smallImage: smallImage || null,
+            };
+
+            fileListing.push(AirplaneObject);
           }
-
-          let AirplaneObject = {
-            airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim() || null,
-            fileName: allResults[i].elements[0].elements[0].text || null,
-            generation: allResults[i].elements[1].elements[0].text || null,
-            metaGeneration: allResults[i].elements[2].elements[0].text || null,
-            lastModified: allResults[i].elements[3].elements[0].text || null,
-            ETag: allResults[i].elements[4].elements[0].text || null,
-            size: allResults[i].elements[5].elements[0].text || null,
-            checkSum: checkSum || null,
-            image: image || null,
-            smallImage: smallImage || null,
-          };
-
-          fileListing.push(AirplaneObject);
         }
       }
 
