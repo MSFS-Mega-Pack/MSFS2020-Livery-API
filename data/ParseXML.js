@@ -1,18 +1,9 @@
-const {
-  default: fetch
-} = require('node-fetch');
+const { default: fetch } = require('node-fetch');
 const convert = require('xml-js');
 const CacheItem = require('../Cache/CacheItem');
-const {
-  CACHE_ENABLED,
-  CDN_URL
-} = require('../Constants');
-const {
-  Storage
-} = require('@google-cloud/storage');
-const {
-  response
-} = require('express');
+const { CACHE_ENABLED, CDN_URL } = require('../Constants');
+const { Storage } = require('@google-cloud/storage');
+const { response } = require('express');
 const Constants = require('../Constants');
 
 require('dotenv').config();
@@ -31,6 +22,7 @@ if (process.env.PROJECT_ID_storage && process.env.CLIENT_EMAIL_storage && proces
     },
   });
 }
+
 /**
  * Get JSON object with all files availible on the server
  *
@@ -54,13 +46,12 @@ async function getAllFiles(cache) {
         if (allResults[i].name == 'Contents') {
           const metadataObject = metadataArray.findByValueOfObject('name', allResults[i].elements[0].elements[0].text);
           if (!allResults[i].elements[0].elements[0].text.startsWith('img')) {
-
             let checkSum, image, smallImage;
 
             if (metadataArray.length > 0 && typeof metadataObject[0] !== 'undefined') {
               checkSum = metadataObject[0].metadata.checkSum;
-              image = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.Image}`);
-              smallImage = encodeURI(`${CDN_URL}/${metadataObject[0].metadata.smallImage}`);
+              image = encodeURI(`${metadataObject[0].metadata.Image}`);
+              smallImage = encodeURI(`${metadataObject[0].metadata.smallImage}`);
             }
 
             let AirplaneObject = {
@@ -83,8 +74,9 @@ async function getAllFiles(cache) {
 
       cache.data.baseManifests.cdnFileListing = new CacheItem({
         cdnBaseUrl: Constants.CDN_URL,
-        fileList: fileListing
+        fileList: fileListing,
       });
+
       return [cache.data.baseManifests.cdnFileListing, false];
     }
   }
@@ -98,10 +90,12 @@ async function getFilesFromStorage() {
   if (!process.env.PROJECT_ID_storage || !process.env.CLIENT_EMAIL_storage || !process.env.PRIVATE_KEY_storage) {
     return [];
   }
+
   let [files] = await storage.bucket(bucketName).getFiles();
-  let temparray = [];
+  let tempArray = [];
+
   await files.forEach(file => {
-    if (!file.name.toString().startsWith("img")) {
+    if (!file.name.toString().startsWith('img')) {
       if (typeof file.metadata.metadata === 'undefined') {
         file.metadata = {
           metadata: {
@@ -111,10 +105,11 @@ async function getFilesFromStorage() {
           },
         };
       }
-      temparray.push(file.metadata);
+      tempArray.push(file.metadata);
     }
   });
-  files = temparray;
+
+  files = tempArray;
   return files;
 }
 

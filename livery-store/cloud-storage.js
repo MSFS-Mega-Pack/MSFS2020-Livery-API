@@ -1,23 +1,10 @@
-/**
- * TODO(developer): Uncomment the following lines before running the sample.
- */
 const bucketName = 'msfsliverypack';
 const fs = require('fs');
-const {
-  readdir,
-  stat,
-  mkdir,
-  unlink
-} = require('fs').promises;
+const { readdir, stat } = require('fs').promises;
 require('dotenv').config();
 let checksum = require('checksum');
-cs = checksum('dshaw');
-// const filename = 'Local file to upload, e.g. ./local/path/to/file.txt';
 
-// Imports the Google Cloud client library
-const {
-  Storage
-} = require('@google-cloud/storage');
+const { Storage } = require('@google-cloud/storage');
 
 const projectId = process.env.PROJECT_ID_storage;
 const client_email = process.env.CLIENT_EMAIL_storage;
@@ -33,9 +20,8 @@ const storage = new Storage({
 });
 async function Main() {
   const liveryPaths = await GetDirectories('./public');
-  await AsyncForEach(liveryPaths, async (livDir, i) => {
+  await AsyncForEach(liveryPaths, async livDir => {
     fs.readdir(`./public/${livDir}`, async function (err, files) {
-      //handling error
       if (err) {
         return console.log('Unable to scan directory: ' + err);
       }
@@ -52,6 +38,7 @@ async function Main() {
               smallImage: 0,
               Image: 0,
             };
+
             if (thumbnails.length != 0) {
               for (let i = 0; i < thumbnails.length; i++) {
                 if (thumbnails[i].toString().includes('small')) {
@@ -69,10 +56,19 @@ async function Main() {
   });
 }
 
+/**
+ *
+ * @param {string} liveryType
+ * @param {string} liveryName
+ * @param {string} sum
+ */
 async function getThumbnail(liveryType, liveryName, sum) {
   let result = [];
-  liveryName = liveryName.substring(liveryName.lastIndexOf('/') + 1).trim();
-  liveryName = liveryName.replace('.zip', '');
+  liveryName = liveryName
+    .substring(liveryName.lastIndexOf('/') + 1)
+    .trim()
+    .replace('.zip', '');
+
   let dir = `./downloads/${liveryType}/${liveryName}/SimObjects/Airplanes`;
   if (!fs.existsSync(dir)) return console.log(dir);
   let directories = await GetDirectories(dir);
@@ -84,16 +80,20 @@ async function getThumbnail(liveryType, liveryName, sum) {
       break;
     }
   }
+
   dir += `/${directories}`;
-  await fs.readdir(dir, async (err, files) => {
-    await files.forEach(async file => {
-      if (file.includes("thumbnail")) {
-        const datatype = file.substr(file.lastIndexOf('.') + 1).trim();
-        if (datatype.toLowerCase().includes("jpg") || datatype.toLowerCase().includes("png") || datatype.toLowerCase().includes("gif")) {
-          let dest = `img/${liveryType}/${liveryName}.${datatype}`;
-          if (file.includes("_small")) dest = `img/${liveryType}/${liveryName}_small.${datatype}`;
+  fs.readdir(dir, async (err, files) => {
+    files.forEach(async file => {
+      if (file.includes('thumbnail')) {
+        const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
+
+        if (dataType.match(/(jpe?g|png|gif)/i)) {
+          let dest = `img/${liveryType}/${liveryName}.${dataType}`;
+          if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
+
           uploadFile(
-            `${dir}/${file}`, {
+            `${dir}/${file}`,
+            {
               checkSum: sum,
             },
             dest
