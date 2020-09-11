@@ -90,15 +90,17 @@ async function getThumbnail(liveryType, liveryName, sum) {
     await files.forEach(async file => {
       if (file.includes("thumbnail")) {
         const datatype = file.substr(file.lastIndexOf('.') + 1).trim();
-        let dest = `img/${liveryType}/${liveryName}.${datatype}`;
-        if (file.includes("_small")) dest = `img/${liveryType}/${liveryName}_small.${datatype}`;
-        uploadFile(
-          `${dir}/${file}`, {
-            checkSum: sum,
-          },
-          dest
-        );
-        result.push(dest)
+        if (datatype.toLowerCase().includes("jpg") || datatype.toLowerCase().includes("png") || datatype.toLowerCase().includes("gif")) {
+          let dest = `img/${liveryType}/${liveryName}.${datatype}`;
+          if (file.includes("_small")) dest = `img/${liveryType}/${liveryName}_small.${datatype}`;
+          uploadFile(
+            `${dir}/${file}`, {
+              checkSum: sum,
+            },
+            dest
+          );
+          result.push(dest);
+        }
       }
     });
   });
