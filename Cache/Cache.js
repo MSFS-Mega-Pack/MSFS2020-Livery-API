@@ -5,7 +5,7 @@ let Cache = {
   data: {
     baseManifests: {
       sourceList: null,
-      cdnList: null,
+      cdnFileListing: null,
     },
   },
 };
@@ -16,7 +16,7 @@ let Cache = {
  * @property {Object} data
  * @property {Object} data.baseManifests
  * @property {?import('./CacheItem')} data.baseManifests.sourceList
- * @property {?import('./CacheItem')} data.baseManifests.cdnList
+ * @property {?import('./CacheItem')} data.baseManifests.cdnFileListing
  */
 
 module.exports = Cache;

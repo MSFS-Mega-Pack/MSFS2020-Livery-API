@@ -4,6 +4,7 @@ const CacheItem = require('../Cache/CacheItem');
 const { CACHE_ENABLED, CDN_URL } = require('../Constants');
 const { Storage } = require('@google-cloud/storage');
 const { response } = require('express');
+const Constants = require('../Constants');
 
 require('dotenv').config();
 const bucketName = 'msfsliverypack';
@@ -29,7 +30,7 @@ if (process.env.PROJECT_ID_storage && process.env.CLIENT_EMAIL_storage && proces
  * @return {Object} JSON object
  */
 async function getAllFiles(cache) {
-  if (!CACHE_ENABLED || cache.data.baseManifests.cdnList === null || cache.data.baseManifests.cdnList.hasExpired) {
+  if (!CACHE_ENABLED || cache.data.baseManifests.cdnFileListing === null || cache.data.baseManifests.cdnFileListing.hasExpired) {
     const response = await fetch(CDN_URL);
 
     if (response.ok) {
@@ -38,7 +39,7 @@ async function getAllFiles(cache) {
         alwaysChildren: true,
       });
       const metadataArray = await getFilesFromStorage();
-      let endVersion = [];
+      let fileListing = [];
       const allResults = parsedResponse.elements[0].elements;
 
       for (let i = 4; i < allResults.length; i++) {
@@ -64,14 +65,15 @@ async function getAllFiles(cache) {
           image: image || null,
           smallImage: smallImage || null,
         };
-        endVersion.push(AirplaneObject);
+
+        fileListing.push(AirplaneObject);
       }
 
-      cache.data.baseManifests.cdnList = new CacheItem(endVersion);
-      return [cache.data.baseManifests.cdnList, false];
+      cache.data.baseManifests.cdnFileListing = new CacheItem({ cdnBaseUrl: Constants.CDN_URL, fileList: fileListing });
+      return [cache.data.baseManifests.cdnFileListing, false];
     }
   }
-  return [cache.data.baseManifests.cdnList, true];
+  return [cache.data.baseManifests.cdnFileListing, true];
 }
 /**
  * Get all metadata from Google Storage, returns array, is empty when not logged in.
