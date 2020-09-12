@@ -59,12 +59,13 @@ class CacheItem {
    * Creates an instance of CacheItem.
    * @param {any} data
    * @param {boolean} [usableIfStale=true] Determines if the CacheItem can still be used when stale in case of a failed refresh (e.g. API outage)
+   * @param {boolean} [permacache=true] Caches for 24h, not for normal time
    * @memberof CacheItem
    */
-  constructor(data, usableIfStale = true) {
+  constructor(data, usableIfStale = true, permacache = true) {
     this.data = data;
     this.cachedAt = new Date().getTime();
-    this.expires = new Date().getTime() + CACHE_TTL;
+    this.expires = new Date().getTime() + (permacache ? 1000 * 60 * 60 * 24 : CACHE_TTL);
     this.usableIfStale = usableIfStale;
   }
 }

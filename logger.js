@@ -25,7 +25,7 @@ function Log(message, severity = SEVERITY.INFO) {
   switch (sev) {
     case SEVERITY.ERROR:
       sevColor = chalk.bgRedBright.black;
-      type = ' ERROR';
+      type = ' ERROR ';
       break;
 
     case SEVERITY.WARNING:

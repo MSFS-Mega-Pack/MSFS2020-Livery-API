@@ -1,4 +1,5 @@
 module.exports = {
-  SourceList: require('./SourceList'),
   AllFiles: require('./AllFiles'),
+  Feed: require('./Feed').FeedRouter,
+  GetArticle: require('./Feed/GetArticle'),
 };
