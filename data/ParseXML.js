@@ -54,9 +54,12 @@ async function getAllFiles(cache) {
               smallImage = encodeURI(`${metadataObject[0].metadata.smallImage}`);
             }
 
+            if (image === '0') image = null;
+            if (smallImage === '0') smallImage = null;
+
             let AirplaneObject = {
               airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim() || null,
-              fileName: allResults[i].elements[0].elements[0].text || null,
+              fileName: encodeURI(allResults[i].elements[0].elements[0].text) || null,
               generation: allResults[i].elements[1].elements[0].text || null,
               metaGeneration: allResults[i].elements[2].elements[0].text || null,
               lastModified: allResults[i].elements[3].elements[0].text || null,
