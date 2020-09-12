@@ -35,7 +35,7 @@ async function FetchFeed(cache) {
       Log("Couldn't fetch updated feed! Re-using old one.");
       return [cache.data.baseManifests.feed, true];
     } else {
-      cache.data.baseManifests.feed = new CacheItem(s);
+      cache.data.baseManifests.feed = new CacheItem(s, true, true);
       return [cache.data.baseManifests.feed, false];
     }
   } else {

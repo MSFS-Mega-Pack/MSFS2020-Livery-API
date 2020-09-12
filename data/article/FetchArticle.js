@@ -24,7 +24,7 @@ async function FetchArticle(cache, articleName) {
         return ['**Article not found.**', false];
       }
     } else {
-      cache.data.baseManifests.feedArticles[articleName] = new CacheItem(s);
+      cache.data.baseManifests.feedArticles[articleName] = new CacheItem(s, true, true);
       return [cache.data.baseManifests.feedArticles[articleName], false];
     }
   } else {
