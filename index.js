@@ -3,14 +3,12 @@ const env = process.env;
 const app = require('express')();
 const port = env.PORT;
 const Log = require('./logger');
-const path = require('path');
 const Cache = require('./Cache/Cache');
 
 const GetHandlers = require('./Handlers/Get');
 const DefaultHandler = require('./Handlers/default');
 const Constants = require('./Constants');
 
-let currentTime = new Date();
 let ActiveCache = Cache;
 
 app.use((req, res, next) => {
@@ -25,10 +23,10 @@ app.use((req, res, next) => {
 // Add ETag caching
 app.set('etag', 'strong');
 
-app.get(`/${Constants.API_VERSION}/get/sourcelist`, (req, res) => GetHandlers.SourceList(req, res, ActiveCache));
-// not actually made yet...
-// app.get(`/${Constants.API_VERSION}/get/allaircraft`, (req, res) => GetHandlers.AllAircraft(req, res, ActiveCache));
 app.get(`/${Constants.API_VERSION}/get/allfiles`, (req, res) => GetHandlers.AllFiles(req, res, ActiveCache));
+
+app.get(`/${Constants.API_VERSION}/get/feed/article/:articleName`, (req, res) => GetHandlers.GetArticle(req, res, ActiveCache));
+app.get(`/${Constants.API_VERSION}/get/feed/:requestType`, (req, res) => GetHandlers.Feed(req, res, ActiveCache));
 
 app.get('*', (req, res) => DefaultHandler(req, res, ActiveCache));
 
