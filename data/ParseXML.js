@@ -1,9 +1,18 @@
-const { default: fetch } = require('node-fetch');
+const {
+  default: fetch
+} = require('node-fetch');
 const convert = require('xml-js');
 const CacheItem = require('../Cache/CacheItem');
-const { CACHE_ENABLED, CDN_URL } = require('../Constants');
-const { Storage } = require('@google-cloud/storage');
-const { response } = require('express');
+const {
+  CACHE_ENABLED,
+  CDN_URL
+} = require('../Constants');
+const {
+  Storage
+} = require('@google-cloud/storage');
+const {
+  response
+} = require('express');
 const Constants = require('../Constants');
 
 require('dotenv').config();
@@ -39,7 +48,8 @@ async function getAllFiles(cache) {
         ignoreComment: true,
         alwaysChildren: true,
       });
-      const metadataArray = await getFilesFromStorage();
+      const metadataArray = await getFilesFromStorage('img');
+      const metadataArrayImages = await getFilesFromStorage('liveries');
       let fileListing = [];
       const allResults = parsedResponse.elements[0].elements;
       for (let i = 0; i < allResults.length; i++) {
@@ -56,6 +66,11 @@ async function getAllFiles(cache) {
 
             if (image === '0') image = null;
             if (smallImage === '0') smallImage = null;
+            if (image == null || smallImage == null) {
+              const thumbnailFound = await getThumbnail(metadataArrayImages, allResults[i].elements[0].elements[0].text.split('.zip')[0].trim());
+              if (thumbnailFound.Image != null) image = encodeURI(thumbnailFound.Image);
+              if (thumbnailFound.smallImage != null) smallImage = encodeURI(thumbnailFound.smallImage);
+            }
 
             let AirplaneObject = {
               airplane: allResults[i].elements[0].elements[0].text.split('/')[0].split('Liveries')[0].trim() || null,
@@ -89,7 +104,7 @@ async function getAllFiles(cache) {
  * Get all metadata from Google Storage, returns array, is empty when not logged in.
  * @return {Object} JSON object
  */
-async function getFilesFromStorage() {
+async function getFilesFromStorage(FilterOut) {
   if (!process.env.PROJECT_ID_storage || !process.env.CLIENT_EMAIL_storage || !process.env.PRIVATE_KEY_storage) {
     return [];
   }
@@ -98,7 +113,7 @@ async function getFilesFromStorage() {
   let tempArray = [];
 
   await files.forEach(file => {
-    if (!file.name.toString().startsWith('img')) {
+    if (!file.name.toString().startsWith(FilterOut)) {
       if (typeof file.metadata.metadata === 'undefined') {
         file.metadata = {
           metadata: {
@@ -116,12 +131,28 @@ async function getFilesFromStorage() {
   return files;
 }
 
+async function getThumbnail(metaDataArray, aircraftname) {
+  let returnResult = {
+    smallImage: null,
+    Image: null,
+  };
+  let imageURL = `img/${aircraftname}.jpg`;
+  let smallImageURL = `img/${aircraftname}_small.jpg`;
+  try {
+    returnResult.Image = await metaDataArray.findByValueOfObject('name', imageURL)[0].name || null;
+  } catch (error) {}
+  try {
+    returnResult.smallImage = await metaDataArray.findByValueOfObject('name', smallImageURL)[0].name || null;
+  } catch (error) {}
+  return returnResult;
+}
+
 module.exports = {
   getAllFiles: getAllFiles,
 };
 
 Array.prototype.findByValueOfObject = function (key, value) {
   return this.filter(function (item) {
-    return item[key] === value;
+    return item[key].toLowerCase() === value.toLowerCase();
   });
 };
