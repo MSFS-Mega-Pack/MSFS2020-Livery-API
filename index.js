@@ -2,6 +2,7 @@ require('dotenv').config();
 const env = process.env;
 const app = require('express')();
 const port = env.PORT;
+const shrinkRay = require('shrink-ray-current');
 const Log = require('./logger');
 const Cache = require('./Cache/Cache');
 
@@ -22,6 +23,9 @@ app.use((req, res, next) => {
 
 // Add ETag caching
 app.set('etag', 'strong');
+
+// Add gzip/brotli compression
+app.use(shrinkRay({ zlib: { level: 7 }, brotli: { quality: 5 } }));
 
 app.get(`/${Constants.API_VERSION}/get/allfiles`, (req, res) => GetHandlers.AllFiles(req, res, ActiveCache));
 
