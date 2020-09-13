@@ -64,8 +64,8 @@ async function getAllFiles(cache) {
               smallImage = encodeURI(`${metadataObject[0].metadata.smallImage}`);
             }
 
-            if (image === '0') image = null;
-            if (smallImage === '0') smallImage = null;
+            if (image === '0' || image === "undefined") image = null;
+            if (smallImage === '0' || smallImage === "undefined") smallImage = null;
             if (image == null || smallImage == null) {
               const thumbnailFound = await getThumbnail(metadataArrayImages, allResults[i].elements[0].elements[0].text.split('.zip')[0].trim());
               if (thumbnailFound.Image != null) image = encodeURI(thumbnailFound.Image);
