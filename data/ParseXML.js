@@ -1,9 +1,18 @@
-const { default: fetch } = require('node-fetch');
+const {
+  default: fetch
+} = require('node-fetch');
 const convert = require('xml-js');
 const CacheItem = require('../Cache/CacheItem');
-const { CACHE_ENABLED, CDN_URL } = require('../Constants');
-const { Storage } = require('@google-cloud/storage');
-const { response } = require('express');
+const {
+  CACHE_ENABLED,
+  CDN_URL
+} = require('../Constants');
+const {
+  Storage
+} = require('@google-cloud/storage');
+const {
+  response
+} = require('express');
 const Constants = require('../Constants');
 
 require('dotenv').config();
@@ -40,32 +49,34 @@ async function getAllFiles(cache) {
     if (storage != null) {
       for (let i = 0; i < metadataArray.length; i++) {
         let livery = metadataArray[i];
-        let checkSum = livery.metadata.checkSum,
-          image = livery.metadata.Image,
-          smallImage = livery.metadata.smallImage;
+        if (!livery.name.startsWith("./img") && !livery.name.startsWith("img")) {
+          let checkSum = livery.metadata.checkSum,
+            image = livery.metadata.Image,
+            smallImage = livery.metadata.smallImage;
 
-        if (image === '0' || image === 'undefined') image = null;
-        if (smallImage === '0' || smallImage === 'undefined') smallImage = null;
-        if (image == null || smallImage == null) {
-          const thumbnailFound = await getThumbnail(metadataArrayImages, livery.name.split('.zip')[0].trim());
-          if (thumbnailFound.Image != null) image = encodeURI(thumbnailFound.Image);
-          if (thumbnailFound.smallImage != null) smallImage = encodeURI(thumbnailFound.smallImage);
+          if (image === '0' || image === 'undefined') image = null;
+          if (smallImage === '0' || smallImage === 'undefined') smallImage = null;
+          if (image == null || smallImage == null) {
+            const thumbnailFound = await getThumbnail(metadataArrayImages, livery.name.split('.zip')[0].trim());
+            if (thumbnailFound.Image != null) image = encodeURI(thumbnailFound.Image);
+            if (thumbnailFound.smallImage != null) smallImage = encodeURI(thumbnailFound.smallImage);
+          }
+
+          let AirplaneObject = {
+            airplane: livery.name.split('/')[0].split('Liveries')[0].trim() || null,
+            fileName: encodeURI(livery.name) || null,
+            generation: livery.generation || null,
+            metaGeneration: livery.metageneration || null,
+            lastModified: livery.updated || null,
+            ETag: livery.etag || null,
+            size: livery.size || null,
+            checkSum: checkSum || null,
+            image: image || null,
+            smallImage: smallImage || null,
+          };
+
+          fileListing.push(AirplaneObject);
         }
-
-        let AirplaneObject = {
-          airplane: livery.name.split('/')[0].split('Liveries')[0].trim() || null,
-          fileName: encodeURI(livery.name) || null,
-          generation: livery.generation || null,
-          metaGeneration: livery.metageneration || null,
-          lastModified: livery.updated || null,
-          ETag: livery.etag || null,
-          size: livery.size || null,
-          checkSum: checkSum || null,
-          image: image || null,
-          smallImage: smallImage || null,
-        };
-
-        fileListing.push(AirplaneObject);
       }
       cache.data.baseManifests.cdnFileListing = new CacheItem({
         cdnBaseUrl: Constants.CDN_URL,
