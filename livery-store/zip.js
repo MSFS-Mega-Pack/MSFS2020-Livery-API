@@ -31,6 +31,7 @@ async function Main() {
         let archive = archiver('zip', {
           zlib: {
             level: 9,
+            memLevel: 9,
           }, // Sets the compression level.
         });
 
