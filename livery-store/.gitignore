@@ -1,5 +1,6 @@
 downloads/
 public/
+compressed/
 
 credentials.json
 token.json
