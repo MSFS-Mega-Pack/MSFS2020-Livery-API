@@ -1,17 +1,11 @@
 const bucketName = 'msfsliverypack';
 const fs = require('fs');
-const {
-  readdir,
-  stat
-} = require('fs').promises;
+const { readdir, stat } = require('fs').promises;
 require('dotenv').config();
 let checksum = require('checksum');
 const sharp = require('sharp');
 
-const {
-  Storage
-} = require('@google-cloud/storage');
-const e = require('express');
+const { Storage } = require('@google-cloud/storage');
 
 const projectId = process.env.PROJECT_ID_storage;
 const client_email = process.env.CLIENT_EMAIL_storage;
@@ -100,16 +94,17 @@ async function getThumbnail(liveryType, liveryName, sum) {
           sharp(`${dir}/${file}`)
             .jpeg({
               progressive: true,
-              force: false
+              force: false,
             })
             .png({
               progressive: true,
-              force: false
+              force: false,
             })
             .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
               if (!err) {
                 uploadFile(
-                  `./compressed/${liveryName}${file}`, {
+                  `./compressed/${liveryName}${file}`,
+                  {
                     checkSum: sum,
                   },
                   dest
@@ -117,7 +112,8 @@ async function getThumbnail(liveryType, liveryName, sum) {
                 result.push(dest);
               } else {
                 uploadFile(
-                  `${dir}/${file}`, {
+                  `${dir}/${file}`,
+                  {
                     checkSum: sum,
                   },
                   dest

@@ -1,6 +1,6 @@
 const archiver = require('archiver');
 
-const { readdir, stat, mkdir, unlink } = require('fs').promises;
+const { readdir, stat, mkdir } = require('fs').promises;
 const { createWriteStream, existsSync, unlinkSync } = require('fs');
 
 const chalk = require('chalk');
