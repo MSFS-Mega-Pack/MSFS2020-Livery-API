@@ -1,18 +1,9 @@
-const {
-  default: fetch
-} = require('node-fetch');
+const { default: fetch } = require('node-fetch');
 const convert = require('xml-js');
 const CacheItem = require('../Cache/CacheItem');
-const {
-  CACHE_ENABLED,
-  CDN_URL
-} = require('../Constants');
-const {
-  Storage
-} = require('@google-cloud/storage');
-const {
-  response
-} = require('express');
+const { CACHE_ENABLED, CDN_URL } = require('../Constants');
+const { Storage } = require('@google-cloud/storage');
+const { response } = require('express');
 const Constants = require('../Constants');
 
 require('dotenv').config();
@@ -49,7 +40,7 @@ async function getAllFiles(cache) {
     if (storage != null) {
       for (let i = 0; i < metadataArray.length; i++) {
         let livery = metadataArray[i];
-        if (!livery.name.startsWith("./img") && !livery.name.startsWith("img")) {
+        if (!livery.name.startsWith('./img') && !livery.name.startsWith('img')) {
           let checkSum = livery.metadata.checkSum,
             image = livery.metadata.Image,
             smallImage = livery.metadata.smallImage;
