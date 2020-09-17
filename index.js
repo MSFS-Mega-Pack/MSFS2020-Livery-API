@@ -5,6 +5,7 @@ const port = env.PORT;
 const shrinkRay = require('shrink-ray-current');
 const Log = require('./logger');
 const Cache = require('./Cache/Cache');
+const SentryHelper = require('./helpers/Sentry');
 
 const GetHandlers = require('./Handlers/Get');
 const DefaultHandler = require('./Handlers/default');
