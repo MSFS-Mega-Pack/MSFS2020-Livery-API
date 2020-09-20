@@ -5,7 +5,7 @@ git.init()
   .then(function onInit(initResult) {
     console.log(initResult)
     if (!initResult.existing) {
-      git.addRemote('master', 'https://github.com/MSFS-Mega-Pack/MSFS2020-livery-templates.git', '--depth 1');
+      git.addRemote('master', 'https://github.com/MSFS-Mega-Pack/MSFS2020-livery-megapack.git', '--depth 1');
     }
   })
   .then(() => git.fetch())
@@ -15,4 +15,3 @@ git.init()
     }
   }))
   .catch(err => console.error(err));
-  
