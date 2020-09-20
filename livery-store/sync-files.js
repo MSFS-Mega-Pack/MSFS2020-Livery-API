@@ -1,6 +1,11 @@
 const simpleGit = require('simple-git');
 const git = simpleGit('./liverypackDownloads');
+const fs = require('fs').promises;
 
+fs.mkdir('./liverypackDownloads', {
+  recursive: true,
+  mode: 0o755,
+});
 git.init()
   .then(function onInit(initResult) {
     console.log(initResult)
