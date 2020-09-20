@@ -18,7 +18,7 @@ async function Main() {
     mode: 0o755,
   });
 
-  const liveryPaths = await GetDirectories('./downloads');
+  const liveryPaths = await GetDirectories('./liverypackDownloads/Liveries/Asobo');
 
   await AsyncForEach(liveryPaths, async (livDir, i) => {
     await mkdir(`./public/${livDir}`, {
