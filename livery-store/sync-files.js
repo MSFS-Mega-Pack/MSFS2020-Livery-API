@@ -44,7 +44,6 @@ async function Start() {
 
   console.log(zipPath);
   console.log(`Finished downloading: ${zipName}`);
-  const zip = new admzip(zipPath);
 
   console.log(`Created folder \n${Directory}`);
 
@@ -90,7 +89,7 @@ async function Start() {
       })
       .on('finish', async () => {
         console.log(`Finished downloading: ${zipName}`);
-        const zip = new admzip(zipPath);
+        //const zip = new admzip(zipPath);
 
         console.log(`Created folder \n${Directory}`);
         try {
