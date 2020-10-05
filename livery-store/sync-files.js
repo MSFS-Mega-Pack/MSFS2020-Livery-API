@@ -30,6 +30,10 @@ const prefixes = [
 const { readdir, stat, mkdir } = require('fs').promises;
 
 async function Start() {
+  await fs.rmdirSync(`./downloads`, { recursive: true });
+  await fs.rmdirSync(`./compressed`, { recursive: true });
+  await fs.rmdirSync(`./liverypackUnzip`, { recursive: true });
+  await fs.rmdirSync(`./liverypackDownloads`, { recursive: true });
   const Directory = `./liverypackDownloads/`;
   const downloadURL = 'https://liveriesmegapack.b-cdn.net/LiveriesMegaPackVersionX.1.zip';
   const zipName = downloadURL.substr(downloadURL.lastIndexOf('/') + 1);
