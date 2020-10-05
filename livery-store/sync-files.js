@@ -78,7 +78,6 @@ async function Start() {
   await new Promise((resolve, reject) => {
     console.log(`Making stream`);
     const stream = fs.createWriteStream(zipPath);
-    console.l
     console.log(`Starting DL`);
     request
       .get(downloadURL)
