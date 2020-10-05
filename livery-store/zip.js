@@ -18,14 +18,14 @@ async function Main() {
     mode: 0o755,
   });
 
-  const liveryPaths = await GetDirectories('./liverypackDownloads/Liveries/Asobo');
+  const liveryPaths = await GetDirectories('./downloads');
 
   await AsyncForEach(liveryPaths, async (livDir, i) => {
     await mkdir(`./public/${livDir}`, {
       recursive: true,
       mode: 0o755,
     });
-    const liveryPathsRaw = await GetDirectories(`./liverypackDownloads/Liveries/Asobo/${livDir}`);
+    const liveryPathsRaw = await GetDirectories(`./downloads/${livDir}`);
     await AsyncForEach(liveryPathsRaw, async (livDirRaw, index) => {
       return new Promise(fulfil => {
         let archive = archiver('zip', {
@@ -57,7 +57,7 @@ async function Main() {
         console.log(chalk.bold(CenterText('Archiving...')));
         console.log(chalk.grey(CenterText('This might take a while...')));
 
-        archive.directory(`liverypackDownloads/Liveries/Asobo/${livDir}/${livDirRaw}`, false).finalize();
+        archive.directory(`downloads/${livDir}/${livDirRaw}`, false).finalize();
 
         output.on('finish', () => {
           fulfil();
