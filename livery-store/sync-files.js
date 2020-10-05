@@ -41,6 +41,7 @@ async function Start() {
   const extract = require('extract-zip');
   const extractDir = `./liverypackDownloads/`;
   const newDirName = 'liverypackDownloads';
+  const unzipPath = resolve('./liverypackUnzip/');
 
   console.log(zipPath);
   console.log(`Finished downloading: ${zipName}`);
@@ -77,7 +78,7 @@ async function Start() {
   await new Promise((resolve, reject) => {
     console.log(`Making stream`);
     const stream = fs.createWriteStream(zipPath);
-
+    console.l
     console.log(`Starting DL`);
     request
       .get(downloadURL)
@@ -92,9 +93,9 @@ async function Start() {
         //const zip = new admzip(zipPath);
 
         console.log(`Created folder \n${Directory}`);
-        try {
+        try {         
           await extract(zipPath, {
-            dir: resolve('./liverypackUnzip/'),
+            dir: unzipPath,
           });
           console.log('Extraction complete');
           fs.unlinkSync(zipPath);
