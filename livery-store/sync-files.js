@@ -100,7 +100,7 @@ async function Start() {
           console.log('Extraction complete');
           fs.unlinkSync(zipPath);
           console.log(`Installed: ${zipName}`);
-          moveFolders();
+          await moveFolders();
         } catch (err) {
           console.log(err);
         }
