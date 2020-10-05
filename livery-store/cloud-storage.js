@@ -49,7 +49,7 @@ async function Main() {
                 }
               }
             }
-            // uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
+            uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
           }
         });
       });
