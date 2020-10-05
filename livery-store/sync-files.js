@@ -59,6 +59,16 @@ async function Start() {
       recursive: true,
     });
   }
+  if (!fs.existsSync('./downloads/')) {
+    await fsPromises.mkdir('./downloads/', {
+      recursive: true,
+    });
+  }
+  if (!fs.existsSync('./compressed/')) {
+    await fsPromises.mkdir('./compressed/', {
+      recursive: true,
+    });
+  }
 
   console.log(`check zip exists`);
   if (fs.existsSync(zipPath)) {
