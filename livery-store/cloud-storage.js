@@ -39,7 +39,7 @@ async function Main() {
               smallImage: 0,
               Image: 0,
             };
-            if (thumbnails && thumbnails.length != 0) {
+            if (thumbnails.length != 0) {
               for (let i = 0; i < thumbnails.length; i++) {
                 if (thumbnails[i].toString().includes('small')) {
                   uploadMetadata.smallImage = thumbnails[i].toString();
