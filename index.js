@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 });
 
 // Add ETag caching
-app.set('etag', 'strong');
+app.set('etag', 'weak');
 
 // Add gzip/brotli compression
 app.use(shrinkRay({ zlib: { level: 7 }, brotli: { quality: 5 } }));
