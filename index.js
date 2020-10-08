@@ -18,12 +18,12 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   res.header('Access-Control-Allow-Methods', 'GET');
   res.header('Access-Control-Max-Age', 86400);
-  res.header('Cache-Control', `public, max-age=${Math.round(Constants.CACHE_TTL / 1000)}, stale-if-error=600, stale-while-revalidate=120`);
+  res.header('Cache-Control', 'public, max-age=60, stale-if-error=600');
   next();
 });
 
 // Add ETag caching
-app.set('etag', 'weak');
+app.set('etag', 'strong');
 
 // Add gzip/brotli compression
 app.use(shrinkRay({ zlib: { level: 7 }, brotli: { quality: 5 } }));
