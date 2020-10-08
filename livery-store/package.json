@@ -24,6 +24,7 @@
     "chalk": "^4.1.0",
     "checksum": "^0.1.1",
     "cheerio": "^1.0.0-rc.3",
+    "deterministic-zip": "^1.1.0",
     "dotenv": "^8.2.0",
     "extract-zip": "^2.0.1",
     "googleapis": "^59.0.0",

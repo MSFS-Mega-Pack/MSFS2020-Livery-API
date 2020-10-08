@@ -92,7 +92,7 @@ async function Start() {
         //const zip = new admzip(zipPath);
 
         console.log(`Created folder \n${Directory}`);
-        try {         
+        try {
           await extract(zipPath, {
             dir: unzipPath,
           });
