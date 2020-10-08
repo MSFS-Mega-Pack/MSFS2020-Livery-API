@@ -34,6 +34,7 @@ async function Start() {
   await fs.rmdirSync(`./compressed`, { recursive: true });
   await fs.rmdirSync(`./liverypackUnzip`, { recursive: true });
   await fs.rmdirSync(`./liverypackDownloads`, { recursive: true });
+  await fs.rmdirSync(`./public`, { recursive: true });
   const Directory = `./liverypackDownloads/`;
   const downloadURL = 'https://liveriesmegapack.b-cdn.net/LiveriesMegaPackVersionX.1.zip';
   const zipName = downloadURL.substr(downloadURL.lastIndexOf('/') + 1);
@@ -66,6 +67,11 @@ async function Start() {
   }
   if (!fs.existsSync('./compressed/')) {
     await fsPromises.mkdir('./compressed/', {
+      recursive: true,
+    });
+  }
+  if (!fs.existsSync('./public/')) {
+    await fsPromises.mkdir('./public/', {
       recursive: true,
     });
   }
