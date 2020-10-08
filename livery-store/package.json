@@ -11,15 +11,33 @@
     "sync": "node .",
     "zip": "node zip.js",
     "upload": "node -r dotenv/config cloud-storage.js",
-    "clean": "rm -r downloads/ public/ compressed/"
+    "clean": "rm -r downloads/ public/ compressed/",
+    "format": "prettier --write \"**/*.{js,json,less,css,md}\"",
+    "format:check": "prettier --loglevel debug --check \"**/*.{js,json,less,css,md}\"",
+    "eslint": "npx eslint .",
+    "eslint:fix": "yarn eslint --fix"
   },
   "dependencies": {
     "@google-cloud/storage": "^5.3.0",
+    "adm-zip": "^0.4.16",
     "archiver": "^5.0.2",
     "chalk": "^4.1.0",
     "checksum": "^0.1.1",
+    "cheerio": "^1.0.0-rc.3",
+    "deterministic-zip": "^1.1.0",
     "dotenv": "^8.2.0",
+    "extract-zip": "^2.0.1",
     "googleapis": "^59.0.0",
-    "sharp": "^0.26.0"
+    "ncp": "^2.0.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "sharp": "^0.26.0",
+    "simple-git": "^2.20.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.9.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "prettier": "^2.1.2"
   }
 }

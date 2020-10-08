@@ -39,7 +39,6 @@ async function Main() {
               smallImage: 0,
               Image: 0,
             };
-
             if (thumbnails.length != 0) {
               for (let i = 0; i < thumbnails.length; i++) {
                 if (thumbnails[i].toString().includes('small')) {
@@ -49,7 +48,7 @@ async function Main() {
                 }
               }
             }
-            // uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
+            uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
           }
         });
       });

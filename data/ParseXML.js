@@ -177,10 +177,17 @@ async function getThumbnail(metaDataArray, aircraftname) {
   let imageURL = `img/${aircraftname}.jpg`;
   let smallImageURL = `img/${aircraftname}_small.jpg`;
   try {
-    returnResult.Image = (await metaDataArray.findByValueOfObject('name', imageURL)[0].name) || null;
+    returnResult.Image =
+      (await metaDataArray.findByValueOfObject('name', imageURL)[0].name) ||
+      (await metaDataArray.findByValueOfObject('name', `img/${aircraftname.split('/')[0].split('Liveries')[0].trim()}/thumbnail.JPG`)[0].name) ||
+      null;
   } catch (error) {}
   try {
-    returnResult.smallImage = (await metaDataArray.findByValueOfObject('name', smallImageURL)[0].name) || null;
+    returnResult.smallImage =
+      (await metaDataArray.findByValueOfObject('name', smallImageURL)[0].name) ||
+      (await metaDataArray.findByValueOfObject('name', `img/${aircraftname.split('/')[0].split('Liveries')[0].trim()}/thumbnail_small.JPG`)[0]
+        .name) ||
+      null;
   } catch (error) {}
   return returnResult;
 }
@@ -191,6 +198,8 @@ module.exports = {
 
 Array.prototype.findByValueOfObject = function (key, value) {
   return this.filter(function (item) {
-    return item[key].toLowerCase() === value.toLowerCase();
+    try {
+      return item[key].toLowerCase() === value.toLowerCase();
+    } catch (error) {}
   });
 };
