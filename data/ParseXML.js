@@ -179,13 +179,13 @@ async function getThumbnail(metaDataArray, aircraftname) {
   try {
     returnResult.Image =
       (await metaDataArray.findByValueOfObject('name', imageURL)[0].name) ||
-      (await metaDataArray.findByValueOfObject('name', `img/${aircraftname.split('/')[0].split('Liveries')[0].trim()}/thumbnail.JPG`)[0].name) ||
+      (await metaDataArray.findByValueOfObject('name', `img/${aircraftname.split('/')[0].split('Liveries')[0].trim()}/thumbnail.jpg`)[0].name) ||
       null;
   } catch (error) {}
   try {
     returnResult.smallImage =
       (await metaDataArray.findByValueOfObject('name', smallImageURL)[0].name) ||
-      (await metaDataArray.findByValueOfObject('name', `img/${aircraftname.split('/')[0].split('Liveries')[0].trim()}/thumbnail_small.JPG`)[0]
+      (await metaDataArray.findByValueOfObject('name', `img/${aircraftname.split('/')[0].split('Liveries')[0].trim()}/thumbnail_small.jpg`)[0]
         .name) ||
       null;
   } catch (error) {}
