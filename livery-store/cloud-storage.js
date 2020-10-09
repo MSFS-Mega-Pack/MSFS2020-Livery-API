@@ -39,14 +39,18 @@ async function Main() {
               smallImage: 0,
               Image: 0,
             };
-            if (thumbnails.length != 0) {
-              for (let i = 0; i < thumbnails.length; i++) {
-                if (thumbnails[i].toString().includes('small')) {
-                  uploadMetadata.smallImage = thumbnails[i].toString();
-                } else {
-                  uploadMetadata.Image = thumbnails[i].toString();
+            try {
+              if (thumbnails.length != 0) {
+                for (let i = 0; i < thumbnails.length; i++) {
+                  if (thumbnails[i].toString().includes('small')) {
+                    uploadMetadata.smallImage = thumbnails[i].toString();
+                  } else {
+                    uploadMetadata.Image = thumbnails[i].toString();
+                  }
                 }
               }
+            } catch (error) {
+              console.log(error);
             }
             uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
           }
