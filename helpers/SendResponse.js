@@ -24,10 +24,10 @@ function SendJSONResponse(res, data, wasCached, cachedAt = null, statusCode = 20
 
     if (cachedAt) {
       res.setHeader(Headers.cachedAtTime, cachedAt);
-      res.setHeader(Headers.cacheExpiresIn, now.getTime() - cachedAt - Constants.CACHE_TTL);
+      // res.setHeader(Headers.cacheExpiresIn, now.getTime() - cachedAt - Constants.CACHE_TTL);
     } else {
       res.setHeader(Headers.cachedAtTime, 'unknown');
-      res.setHeader(Headers.cacheExpiresIn, 'unknown');
+      // res.setHeader(Headers.cacheExpiresIn, 'unknown');
     }
   }
 
@@ -57,10 +57,10 @@ function SendFileResponse(res, path, wasCached = false, cachedAt = null, statusC
 
     if (cachedAt) {
       res.setHeader(Headers.cachedAtTime, cachedAt);
-      res.setHeader(Headers.cacheExpiresIn, new Date() - cachedAt - Constants.CACHE_TTL);
+      // res.setHeader(Headers.cacheExpiresIn, new Date() - cachedAt - Constants.CACHE_TTL);
     } else {
       res.setHeader(Headers.cachedAtTime, 'unknown');
-      res.setHeader(Headers.cacheExpiresIn, 'unknown');
+      // res.setHeader(Headers.cacheExpiresIn, 'unknown');
     }
   }
 
