@@ -114,7 +114,7 @@ async function Start() {
 }
 
 async function moveFolders() {
-  const liveryPaths = await GetDirectories('./liverypackUnzip');
+  const liveryPaths = await GetDirectories('./liverypackUnzip/Liveries Mega Pack/');
   await AsyncForEach(liveryPaths, async (livDir, i) => {
     const destFolder = getAircraftByPrefix(livDir);
     if (destFolder != undefined) {
@@ -123,12 +123,12 @@ async function moveFolders() {
           recursive: true,
         });
       }
-      ncp(`./liverypackUnzip/${livDir}`, `./downloads/${destFolder}/${livDir}`, async function (err) {
+      ncp(`./liverypackUnzip/Liveries Mega Pack/${livDir}`, `./downloads/${destFolder}/${livDir}`, async function (err) {
         if (err) {
           return console.error(err);
         }
         console.log('done!');
-        await fs.rmdirSync(`./liverypackUnzip/${livDir}`, { recursive: true });
+        await fs.rmdirSync(`./liverypackUnzip/Liveries Mega Pack/${livDir}`, { recursive: true });
       });
     }
   });
