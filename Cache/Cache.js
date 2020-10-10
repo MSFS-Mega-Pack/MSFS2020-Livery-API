@@ -8,6 +8,10 @@ let Cache = {
       feed: null,
       feedArticles: [],
     },
+    updates: {
+      latestVersion: null,
+      changelog: null,
+    },
   },
 };
 
@@ -19,6 +23,8 @@ let Cache = {
  * @property {?import('./CacheItem')} data.baseManifests.cdnFileListing
  * @property {?import('./CacheItem')} data.baseManifests.feed
  * @property {import('./CacheItem')[]} data.baseManifests.feedArticles
+ * @property {import('./CacheItem')} data.updates.latestVersion
+ * @property {import('./CacheItem')} data.updates.changelog
  */
 
 module.exports = Cache;
