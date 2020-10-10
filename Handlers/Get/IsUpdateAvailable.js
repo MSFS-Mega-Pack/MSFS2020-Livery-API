@@ -9,7 +9,7 @@ const semver = require('semver');
  * @param {import('../Cache/Cache').ActiveCache} cache Active cache
  */
 async function IsUpdateAvailable(req, res, cache) {
-  const clientVersion = semver.clean(req.params.v);
+  const clientVersion = req.params.v;
   console.log(clientVersion);
 
   let [cacheItem, wasCached] = await GetVersion(cache);
@@ -20,7 +20,7 @@ async function IsUpdateAvailable(req, res, cache) {
   if (typeof clientVersion === 'undefined') {
     SendResponse.JSON(res, latestVersion, wasCached, cacheItem.cachedAt);
   } else {
-    const updateAvailable = semver.lt(clientVersion, latestVersion.latest);
+    const updateAvailable = semver.lt(semver.clean(clientVersion), latestVersion.latest);
 
     if (!updateAvailable) {
       SendResponse.JSON(res, { update: false }, wasCached, cacheItem.cachedAt);
