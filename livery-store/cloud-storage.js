@@ -73,10 +73,14 @@ async function getThumbnail(liveryType, liveryName, sum) {
     .trim()
     .replace('.zip', '');
 
-  let dir = `./downloads/${liveryType}/${liveryName}/SimObjects/Airplanes`;
+  let dir = `./downloads/${liveryType}/${liveryName}/SimObjects`;
   if (!fs.existsSync(dir)) return console.log(dir);
   let directories = await GetDirectories(dir);
   dir += `/${directories[0]}`;
+  if (!fs.existsSync(dir)) return console.log(dir);
+  directories = await GetDirectories(dir);
+  dir += `/${directories[0]}`;
+  if (!fs.existsSync(dir)) return console.log(dir);
   directories = await GetDirectories(dir);
   for (let i = 0; i < directories.length; i++) {
     if (directories[i].includes('TEXTURE.')) {
