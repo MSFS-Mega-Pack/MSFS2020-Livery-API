@@ -23,9 +23,9 @@ async function IsUpdateAvailable(req, res, cache) {
     const updateAvailable = semver.lt(clientVersion, latestVersion.latest);
 
     if (!updateAvailable) {
-      SendResponse.JSON(res, { update: false }, wasCached, cache.cachedAt);
+      SendResponse.JSON(res, { update: false }, wasCached, cacheItem.cachedAt);
     } else {
-      SendResponse.JSON(res, { update: true, info: latestVersion }, wasCached, cache.cachedAt);
+      SendResponse.JSON(res, { update: true, info: latestVersion }, wasCached, cacheItem.cachedAt);
     }
   }
 
