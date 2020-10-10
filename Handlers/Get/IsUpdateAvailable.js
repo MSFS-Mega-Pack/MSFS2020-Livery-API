@@ -9,7 +9,7 @@ const semver = require('semver');
  * @param {import('../Cache/Cache').ActiveCache} cache Active cache
  */
 async function IsUpdateAvailable(req, res, cache) {
-  const clientVersion = req.params.v;
+  const clientVersion = semver.clean(req.params.v);
   console.log(clientVersion);
 
   let [cacheItem, wasCached] = await GetVersion(cache);
