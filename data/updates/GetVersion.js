@@ -26,7 +26,7 @@ async function GetVersion(cache) {
       Log("Couldn't fetch updated version JSON! Re-using old one.");
       return [cache.data.updates.latestVersion, true];
     } else {
-      cache.data.updates.latestVersion = new CacheItem(s, true, true);
+      cache.data.updates.latestVersion = new CacheItem(s, true, false);
       return [cache.data.updates.latestVersion, false];
     }
   } else {
