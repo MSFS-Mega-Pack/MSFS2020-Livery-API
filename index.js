@@ -10,6 +10,7 @@ const SentryHelper = require('./helpers/Sentry');
 const GetHandlers = require('./Handlers/Get');
 const DefaultHandler = require('./Handlers/default');
 const Constants = require('./Constants');
+const SendResponse = require('./helpers/SendResponse');
 
 let ActiveCache = Cache;
 
@@ -28,8 +29,12 @@ app.set('etag', 'weak');
 // Add gzip/brotli compression
 app.use(shrinkRay({ zlib: { level: 7 }, brotli: { quality: 5 } }));
 
-app.get(`/${Constants.API_VERSION}/get/allfiles`, (req, res) => GetHandlers.AllFiles(req, res, ActiveCache));
+app.get(`/${Constants.API_VERSION}/heartbeat`, (req, res) => {
+  Log(`Heartbeat received`, Log.SEVERITY.DEBUG);
+  return SendResponse.JSON(res, { ok: true }, false, null);
+});
 
+app.get(`/${Constants.API_VERSION}/get/allfiles`, (req, res) => GetHandlers.AllFiles(req, res, ActiveCache));
 app.get(`/${Constants.API_VERSION}/get/feed/article/:articleName`, (req, res) => GetHandlers.GetArticle(req, res, ActiveCache));
 app.get(`/${Constants.API_VERSION}/get/feed/:requestType`, (req, res) => GetHandlers.Feed(req, res, ActiveCache));
 app.get(`/${Constants.API_VERSION}/get/update/:v`, (req, res) => GetHandlers.IsUpdateAvailable(req, res, ActiveCache));
