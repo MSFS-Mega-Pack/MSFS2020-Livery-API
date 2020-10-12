@@ -32,6 +32,8 @@ app.get(`/${Constants.API_VERSION}/get/allfiles`, (req, res) => GetHandlers.AllF
 
 app.get(`/${Constants.API_VERSION}/get/feed/article/:articleName`, (req, res) => GetHandlers.GetArticle(req, res, ActiveCache));
 app.get(`/${Constants.API_VERSION}/get/feed/:requestType`, (req, res) => GetHandlers.Feed(req, res, ActiveCache));
+app.get(`/${Constants.API_VERSION}/get/update/:v`, (req, res) => GetHandlers.IsUpdateAvailable(req, res, ActiveCache));
+app.get(`/${Constants.API_VERSION}/get/update`, (req, res) => GetHandlers.IsUpdateAvailable(req, res, ActiveCache));
 
 app.get('*', (req, res) => DefaultHandler(req, res, ActiveCache));
 
