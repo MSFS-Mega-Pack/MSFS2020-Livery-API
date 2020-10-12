@@ -26,7 +26,7 @@ async function FeedRouter(req, res, cache) {
         feed: feed.feed.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3),
       };
 
-      SendResponse.JSON(res, feedToSend, wasCached, cacheItem.cachedAt);
+      SendResponse.JSON(res, feedToSend, wasCached, cacheItem.cachedAt, cacheItem.expires);
       break;
 
     case 'history':
@@ -40,7 +40,7 @@ async function FeedRouter(req, res, cache) {
         feed: feed.feed.sort((a, b) => new Date(b.date) - new Date(a.date)),
       };
 
-      SendResponse.JSON(res, feedToSend, wasCached, cacheItem.cachedAt);
+      SendResponse.JSON(res, feedToSend, wasCached, cacheItem.cachedAt, cacheItem.expires);
       break;
 
     default:
