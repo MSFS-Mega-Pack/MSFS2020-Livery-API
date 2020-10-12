@@ -36,12 +36,10 @@ async function Start() {
   await fs.rmdirSync(`./liverypackDownloads`, { recursive: true });
   await fs.rmdirSync(`./public`, { recursive: true });
   const Directory = `./liverypackDownloads/`;
-  const downloadURL = 'https://liveriesmegapack.b-cdn.net/LiveriesMegaPackVersionX.1.zip';
+  const downloadURL = 'https://liveriesmegapack.b-cdn.net/LiveriesMegaPack.zip';
   const zipName = downloadURL.substr(downloadURL.lastIndexOf('/') + 1);
   const zipPath = Path.join(Directory, zipName);
   const extract = require('extract-zip');
-  const extractDir = `./liverypackDownloads/`;
-  const newDirName = 'liverypackDownloads';
   const unzipPath = resolve('./liverypackUnzip/');
 
   console.log(zipPath);
