@@ -28,6 +28,7 @@
     "dotenv": "^8.2.0",
     "extract-zip": "^2.0.1",
     "googleapis": "^59.0.0",
+    "mongoose": "^5.10.9",
     "ncp": "^2.0.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",

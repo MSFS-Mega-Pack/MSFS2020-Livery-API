@@ -1,25 +1,25 @@
-const bucketName = 'msfsliverypack';
 const fs = require('fs');
-const { readdir, stat } = require('fs').promises;
+const {
+  readdir,
+  stat
+} = require('fs').promises;
 require('dotenv').config();
 let checksum = require('checksum');
 const sharp = require('sharp');
-
-const { Storage } = require('@google-cloud/storage');
-
-const projectId = process.env.PROJECT_ID_storage;
-const client_email = process.env.CLIENT_EMAIL_storage;
-const private_key = process.env.PRIVATE_KEY_storage.replace(/\\n/gm, '\n');
-
-// Creates a client
-const storage = new Storage({
-  projectId,
-  credentials: {
-    client_email,
-    private_key,
-  },
+const mongoose = require('mongoose');
+const LiveryModel = require('./Models/livery');
+mongoose.connect(process.env.MONGOURL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  poolSize: 3
 });
+let AllLiveriesOnDB = [];
+
+
 async function Main() {
+  await LiveryModel.find(function (err, liveries) {
+    AllLiveriesOnDB = liveries;
+  })
   const liveryPaths = await GetDirectories('./public');
   await AsyncForEach(liveryPaths, async livDir => {
     fs.readdir(`./public/${livDir}`, async function (err, files) {
@@ -31,9 +31,10 @@ async function Main() {
         // Do whatever you want to do with the file
         const metadataFile = await getMetadata(`${livDir}/${file}`);
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
-          if (!metadataFile.fileExists || sum != metadataFile.metadata.metadata.checkSum) {
+          if (!metadataFile.fileExists || sum != metadataFile.checkSum) {
             const thumbnails = await getThumbnail(livDir, file, sum);
-            console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.metadata.checkSum} | New: ${sum}`);
+            console.log(await getThumbnail(livDir, file, sum))
+            console.log(`${file}: Different checksum! Old: ${metadataFile.checkSum} | New: ${sum}`);
             let uploadMetadata = {
               checkSum: sum,
               smallImage: 0,
@@ -90,15 +91,15 @@ async function getThumbnail(liveryType, liveryName, sum) {
   }
 
   dir += `/${directories}`;
-  fs.readdir(dir, async (err, files) => {
-    files.forEach(async file => {
+  await fs.readdir(dir, async (err, files) => {
+    await files.forEach(async file => {
       if (file.includes('thumbnail')) {
         const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
 
         if (dataType.match(/(jpe?g|png|gif)/i)) {
           let dest = `img/${liveryType}/${liveryName}.${dataType}`;
           if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
-          sharp(`${dir}/${file}`)
+          await sharp(`${dir}/${file}`)
             .jpeg({
               progressive: true,
               force: false,
@@ -110,8 +111,7 @@ async function getThumbnail(liveryType, liveryName, sum) {
             .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
               if (!err) {
                 uploadFile(
-                  `./compressed/${liveryName}${file}`,
-                  {
+                  `./compressed/${liveryName}${file}`, {
                     checkSum: sum,
                   },
                   dest
@@ -119,8 +119,7 @@ async function getThumbnail(liveryType, liveryName, sum) {
                 result.push(dest);
               } else {
                 uploadFile(
-                  `${dir}/${file}`,
-                  {
+                  `${dir}/${file}`, {
                     checkSum: sum,
                   },
                   dest
@@ -131,30 +130,85 @@ async function getThumbnail(liveryType, liveryName, sum) {
         }
       }
     });
-  });
+  })
   return result;
 }
 
+function addLiverytoDatabase(liveryObject) {
+  LiveryModel.findOne({
+    fileName: liveryObject.filename
+  }, function (err, result) {
+    if (err) return res.send(err);
+    if (result != null) {
+      LiveryModel.updateOne({
+        fileName: liveryObject.filename
+      }, {
+        airplane: liveryObject.airplane,
+        fileName: liveryObject.filename,
+        generation: Math.round(new Date().getTime() / 1000),
+        size: liveryObject.size,
+        checkSum: liveryObject.checkSum,
+        image: liveryObject.image,
+        smallImage: liveryObject.smallImage,
+      }, {
+        upsert: true
+      }, function (err, result) {
+        console.log(`Updated ${liveryObject.fileName}`, result)
+      });
+    } else {
+      const newLivery = new LiveryModel({
+        airplane: liveryObject.airplane,
+        fileName: liveryObject.filename,
+        generation: Math.round(new Date().getTime() / 1000),
+        size: liveryObject.size,
+        checkSum: liveryObject.checkSum,
+        image: liveryObject.image,
+        smallImage: liveryObject.smallImage,
+      });
+      newLivery.save(function (err, result) {
+        if (err) return console.log(err);
+        console.log(`Inserted ${liveryObject.fileName}`, result)
+      });
+    }
+
+
+  })
+}
+
 async function uploadFile(sourceDirectory, metadata, Destdirectory) {
-  //await getMetadata(Destdirectory);
-  // Uploads a local file to the bucket
+  const filename = Destdirectory.toString();
   try {
-    await storage.bucket(bucketName).upload(sourceDirectory, {
-      destination: Destdirectory,
-      // Support for HTTP requests made with `Accept-Encoding: gzip`
-      gzip: true,
-      // By setting the option `destination`, you can change the name of the
-      // object you are uploading to a bucket.
-      metadata: {
-        // Enable long-lived HTTP caching headers
-        // Use only if the contents of the file will never change
-        // (If the contents will change, use cacheControl: 'no-cache')
-        cacheControl: 'public, max-age=31536000',
-        metadata,
+    const formData = {
+      attachments: [
+        fs.createReadStream(sourceDirectory)
+      ],
+    };
+    const request = require('request');
+    request.put({
+      url: `https://ny.storage.bunnycdn.com/liveriesinstaller/${Destdirectory}`,
+      headers: {
+        'AccessKey': process.env.BunnyAPIKey
       },
+      formData: formData
+    }, function optionalCallback(err, httpResponse, body) {
+      if (err) {
+        return console.error('upload failed:', err);
+      }
+      console.log('Upload successful!  Server responded with:', body);
+      console.log(`${sourceDirectory} uploaded to ${Destdirectory}.`);
+      if (!Destdirectory.toString().startsWith("img")) {
+        addLiverytoDatabase({
+          airplane: filename.split('/')[0].trim(),
+          filename: filename,
+          size: fs.statSync(sourceDirectory).size,
+          checkSum: metadata.checkSum,
+          image: metadata.Image,
+          smallImage: metadata.smallImage
+        })
+      }
     });
 
-    console.log(`${sourceDirectory} uploaded to ${Destdirectory}.`);
+
   } catch (error) {
     console.log(`Uploading failed for: ${sourceDirectory}\nReason:`, error);
   }
@@ -163,25 +217,17 @@ async function uploadFile(sourceDirectory, metadata, Destdirectory) {
 async function getMetadata(filename) {
   // Gets the metadata for the file
   try {
-    const [metadata] = await storage.bucket(bucketName).file(filename).getMetadata();
-    if (typeof metadata.metadata === 'undefined')
+    let metadata = AllLiveriesOnDB.filter(livery => livery.fileName == filename)[0];
+    if (typeof metadata === 'undefined')
       metadata = {
-        metadata: {
-          checkSum: 0,
-        },
+        checkSum: 0
       };
     return {
-      fileExists: true,
-      metadata,
+      metadata
     };
   } catch (error) {
     return {
-      fileExists: false,
-      metadata: {
-        metadata: {
-          checkSum: 0,
-        },
-      },
+      checkSum: 0,
     };
   }
 }
