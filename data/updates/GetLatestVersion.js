@@ -19,5 +19,6 @@ async function GetLatestVersion() {
     latest: jsonRelease.tag_name.substr(1), // get version without "v" at the start
     downloadUrl: jsonRelease.assets.filter(asset => asset.name.endsWith('.exe'))[0].browser_download_url,
     date: jsonRelease.published_at,
+    size: jsonRelease.assets.filter(asset => asset.name.endsWith('.exe'))[0].size,
   };
 }

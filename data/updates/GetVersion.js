@@ -11,6 +11,7 @@ module.exports = GetVersion;
  * @property {string} latest
  * @property {string} date
  * @property {string} downloadUrl
+ * @property {int} size
  */
 
 /**

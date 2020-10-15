@@ -11,6 +11,7 @@ let Cache = {
     updates: {
       latestVersion: null,
       changelog: null,
+      size: null,
     },
   },
 };

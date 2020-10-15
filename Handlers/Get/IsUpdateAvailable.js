@@ -20,12 +20,16 @@ async function IsUpdateAvailable(req, res, cache) {
   if (typeof clientVersion === 'undefined') {
     SendResponse.JSON(res, latestVersion, wasCached, cacheItem.cachedAt, cacheItem.expires);
   } else {
-    const updateAvailable = semver.lt(semver.clean(clientVersion), latestVersion.latest);
+    try {
+      const updateAvailable = semver.lt(semver.clean(clientVersion), latestVersion.latest);
 
-    if (!updateAvailable) {
-      SendResponse.JSON(res, { update: false }, wasCached, cacheItem.cachedAt, cacheItem.expires);
-    } else {
-      SendResponse.JSON(res, { update: true, info: latestVersion }, wasCached, cacheItem.cachedAt, cacheItem.expires);
+      if (!updateAvailable) {
+        SendResponse.JSON(res, { update: false }, wasCached, cacheItem.cachedAt, cacheItem.expires);
+      } else {
+        SendResponse.JSON(res, { update: true, info: latestVersion }, wasCached, cacheItem.cachedAt, cacheItem.expires);
+      }
+    } catch (error) {
+      SendResponse.JSON(res, latestVersion, wasCached, cacheItem.cachedAt, cacheItem.expires);
     }
   }
 
