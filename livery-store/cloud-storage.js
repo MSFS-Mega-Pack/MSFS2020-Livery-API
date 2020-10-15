@@ -1,8 +1,5 @@
 const fs = require('fs');
-const {
-  readdir,
-  stat
-} = require('fs').promises;
+const { readdir, stat } = require('fs').promises;
 require('dotenv').config();
 let checksum = require('checksum');
 const sharp = require('sharp');
@@ -11,15 +8,14 @@ const LiveryModel = require('./Models/livery');
 mongoose.connect(process.env.MONGOURL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  poolSize: 3
+  poolSize: 3,
 });
 let AllLiveriesOnDB = [];
-
 
 async function Main() {
   await LiveryModel.find(function (err, liveries) {
     AllLiveriesOnDB = liveries;
-  })
+  });
   const liveryPaths = await GetDirectories('./public');
   await AsyncForEach(liveryPaths, async livDir => {
     fs.readdir(`./public/${livDir}`, async function (err, files) {
@@ -33,7 +29,7 @@ async function Main() {
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
           if (!metadataFile.fileExists || sum != metadataFile.checkSum) {
             const thumbnails = await getThumbnail(livDir, file, sum);
-            console.log(await getThumbnail(livDir, file, sum))
+            console.log(await getThumbnail(livDir, file, sum));
             console.log(`${file}: Different checksum! Old: ${metadataFile.checkSum} | New: ${sum}`);
             let uploadMetadata = {
               checkSum: sum,
@@ -111,7 +107,8 @@ async function getThumbnail(liveryType, liveryName, sum) {
             .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
               if (!err) {
                 uploadFile(
-                  `./compressed/${liveryName}${file}`, {
+                  `./compressed/${liveryName}${file}`,
+                  {
                     checkSum: sum,
                   },
                   dest
@@ -119,7 +116,8 @@ async function getThumbnail(liveryType, liveryName, sum) {
                 result.push(dest);
               } else {
                 uploadFile(
-                  `${dir}/${file}`, {
+                  `${dir}/${file}`,
+                  {
                     checkSum: sum,
                   },
                   dest
@@ -130,85 +128,90 @@ async function getThumbnail(liveryType, liveryName, sum) {
         }
       }
     });
-  })
+  });
   return result;
 }
 
 function addLiverytoDatabase(liveryObject) {
-  LiveryModel.findOne({
-    fileName: liveryObject.filename
-  }, function (err, result) {
-    if (err) return res.send(err);
-    if (result != null) {
-      LiveryModel.updateOne({
-        fileName: liveryObject.filename
-      }, {
-        airplane: liveryObject.airplane,
-        fileName: liveryObject.filename,
-        generation: Math.round(new Date().getTime() / 1000),
-        size: liveryObject.size,
-        checkSum: liveryObject.checkSum,
-        image: liveryObject.image,
-        smallImage: liveryObject.smallImage,
-      }, {
-        upsert: true
-      }, function (err, result) {
-        console.log(`Updated ${liveryObject.fileName}`, result)
-      });
-    } else {
-      const newLivery = new LiveryModel({
-        airplane: liveryObject.airplane,
-        fileName: liveryObject.filename,
-        generation: Math.round(new Date().getTime() / 1000),
-        size: liveryObject.size,
-        checkSum: liveryObject.checkSum,
-        image: liveryObject.image,
-        smallImage: liveryObject.smallImage,
-      });
-      newLivery.save(function (err, result) {
-        if (err) return console.log(err);
-        console.log(`Inserted ${liveryObject.fileName}`, result)
-      });
+  LiveryModel.findOne(
+    {
+      fileName: liveryObject.filename,
+    },
+    function (err, result) {
+      if (err) return res.send(err);
+      if (result != null) {
+        LiveryModel.updateOne(
+          {
+            fileName: liveryObject.filename,
+          },
+          {
+            airplane: liveryObject.airplane,
+            fileName: liveryObject.filename,
+            generation: Math.round(new Date().getTime() / 1000),
+            size: liveryObject.size,
+            checkSum: liveryObject.checkSum,
+            image: liveryObject.image,
+            smallImage: liveryObject.smallImage,
+          },
+          {
+            upsert: true,
+          },
+          function (err, result) {
+            console.log(`Updated ${liveryObject.fileName}`, result);
+          }
+        );
+      } else {
+        const newLivery = new LiveryModel({
+          airplane: liveryObject.airplane,
+          fileName: liveryObject.filename,
+          generation: Math.round(new Date().getTime() / 1000),
+          size: liveryObject.size,
+          checkSum: liveryObject.checkSum,
+          image: liveryObject.image,
+          smallImage: liveryObject.smallImage,
+        });
+        newLivery.save(function (err, result) {
+          if (err) return console.log(err);
+          console.log(`Inserted ${liveryObject.fileName}`, result);
+        });
+      }
     }
-
-
-  })
+  );
 }
 
 async function uploadFile(sourceDirectory, metadata, Destdirectory) {
   const filename = Destdirectory.toString();
   try {
     const formData = {
-      attachments: [
-        fs.createReadStream(sourceDirectory)
-      ],
+      attachments: [fs.createReadStream(sourceDirectory)],
     };
     const request = require('request');
-    request.put({
-      url: `https://ny.storage.bunnycdn.com/liveriesinstaller/${Destdirectory}`,
-      headers: {
-        'AccessKey': process.env.BunnyAPIKey
+    request.put(
+      {
+        url: `https://ny.storage.bunnycdn.com/liveriesinstaller/${Destdirectory}`,
+        headers: {
+          AccessKey: process.env.BunnyAPIKey,
+        },
+        formData: formData,
       },
-      formData: formData
-    }, function optionalCallback(err, httpResponse, body) {
-      if (err) {
-        return console.error('upload failed:', err);
+      function optionalCallback(err, httpResponse, body) {
+        if (err) {
+          return console.error('upload failed:', err);
+        }
+        console.log('Upload successful!  Server responded with:', body);
+        console.log(`${sourceDirectory} uploaded to ${Destdirectory}.`);
+        if (!Destdirectory.toString().startsWith('img')) {
+          addLiverytoDatabase({
+            airplane: filename.split('/')[0].trim(),
+            filename: filename,
+            size: fs.statSync(sourceDirectory).size,
+            checkSum: metadata.checkSum,
+            image: metadata.Image,
+            smallImage: metadata.smallImage,
+          });
+        }
       }
-      console.log('Upload successful!  Server responded with:', body);
-      console.log(`${sourceDirectory} uploaded to ${Destdirectory}.`);
-      if (!Destdirectory.toString().startsWith("img")) {
-        addLiverytoDatabase({
-          airplane: filename.split('/')[0].trim(),
-          filename: filename,
-          size: fs.statSync(sourceDirectory).size,
-          checkSum: metadata.checkSum,
-          image: metadata.Image,
-          smallImage: metadata.smallImage
-        })
-      }
-    });
-
-
+    );
   } catch (error) {
     console.log(`Uploading failed for: ${sourceDirectory}\nReason:`, error);
   }
@@ -220,10 +223,10 @@ async function getMetadata(filename) {
     let metadata = AllLiveriesOnDB.filter(livery => livery.fileName == filename)[0];
     if (typeof metadata === 'undefined')
       metadata = {
-        checkSum: 0
+        checkSum: 0,
       };
     return {
-      metadata
+      metadata,
     };
   } catch (error) {
     return {

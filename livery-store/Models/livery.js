@@ -1,7 +1,8 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const LiverySchema = new Schema({
+const LiverySchema = new Schema(
+  {
     airplane: String,
     fileName: String,
     generation: String,
@@ -9,10 +10,12 @@ const LiverySchema = new Schema({
     checkSum: String,
     image: String,
     smallImage: String,
-}, {
+  },
+  {
     timestamps: {
-        currentTime: () => Date.now()
-    }
-});
+      currentTime: () => Date.now(),
+    },
+  }
+);
 
-module.exports = mongoose.model("Livery", LiverySchema);
+module.exports = mongoose.model('Livery', LiverySchema);
