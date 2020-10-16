@@ -57,7 +57,7 @@ async function getAllFiles(cache) {
         }
         try {
           const airplane = livery.Path.split('/liveriesinstaller/')[1].split('/')[0].trim();
-          const fileName = encodeURI(`${livery.Path}${livery.ObjectName}`);
+          const fileName = encodeURI(`${livery.Path}${livery.ObjectName}`.split('/liveriesinstaller')[1]);
           let displayName = fileName.substr(fileName.lastIndexOf('/') + 1);
           displayName = displayName.substr(0, displayName.length - 4);
           let AirplaneObject = {
