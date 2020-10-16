@@ -56,9 +56,14 @@ async function getAllFiles(cache) {
           if (thumbnailFound.smallImage != null) smallImage = encodeURI(thumbnailFound.smallImage);
         }
         try {
+          const airplane = livery.Path.split('/liveriesinstaller/')[1].split('/')[0].trim();
+          const fileName = encodeURI(`${livery.Path}${livery.ObjectName}`);
+          let displayName = fileName.substr(fileName.lastIndexOf('/') + 1);
+          displayName = displayName.substr(0, displayName.length - 4);
           let AirplaneObject = {
-            airplane: livery.Path.split('/liveriesinstaller/')[1].split('/')[0].trim() || null,
-            fileName: encodeURI(`${livery.Path}${livery.ObjectName}`) || null,
+            airplane: airplane || null,
+            fileName: fileName || null,
+            displayName: displayName || null,
             generation: livery.LastChanged || null,
             metaGeneration: livery.Guid || null,
             lastModified: livery.LastChanged || null,
