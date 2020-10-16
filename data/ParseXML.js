@@ -37,13 +37,16 @@ async function getAllFiles(cache) {
 
     const metadataArray = await getFilesFromStorage('https://ny.storage.bunnycdn.com/liveriesinstaller/');
     const metaDataDB = await LiveryModel.find();
-    console.log(metaDataDB);
+    console.log(metaDataDB.length, metadataArray.liveries.length);
     let fileListing = [];
     for (let i = 0; i < metadataArray.liveries.length; i++) {
       let livery = metadataArray.liveries[i];
-      if (!livery.Path.startsWith('./img') && !livery.Path.startsWith('img')) {
+      if (!livery.Path.startsWith('/liveriesinstaller/img') && !livery.Path.startsWith('img')) {
         let image = null,
-          smallImage = null;
+          smallImage = null,
+          checkSum = metaDataDB.filter(
+            liv => liv.fileName == `${livery.Path.split('/liveriesinstaller/')[1].split('/')[0].trim()}/${livery.ObjectName}`
+          )[0].checkSum;
 
         if (image === '0' || image === 'undefined') image = null;
         if (smallImage === '0' || smallImage === 'undefined') smallImage = null;
@@ -61,10 +64,7 @@ async function getAllFiles(cache) {
             lastModified: livery.LastChanged || null,
             ETag: livery.Guid || null,
             size: livery.Length || null,
-            checkSum:
-              metaDataDB.filter(
-                liv => liv.fileName == `${livery.Path.split('/liveriesinstaller/')[1].split('/')[0].trim()}/${livery.ObjectName}`
-              )[0].checkSum || null,
+            checkSum: checkSum || null,
             image: image || null,
             smallImage: smallImage || null,
           };
@@ -121,8 +121,9 @@ async function getFilesFromStorage(url) {
     request(options, async function (error, response, body) {
       if (!error && response.statusCode == 200) {
         body = JSON.parse(body);
+        console.log('Getting ', url.split('https://ny.storage.bunnycdn.com')[1].trim(), body.length);
         for (let i = 0; i < body.length; i++) {
-          console.log(`https://ny.storage.bunnycdn.com${body[i].Path}${body[i].ObjectName}/`, url);
+          // console.log(`https://ny.storage.bunnycdn.com${body[i].Path}${body[i].ObjectName}/`, url);
           if (body[i].IsDirectory) {
             let returned = await getFilesFromStorage(`https://ny.storage.bunnycdn.com${body[i].Path}${body[i].ObjectName}/`);
             returnObject.liveries = returnObject.liveries.concat(returned.liveries);
