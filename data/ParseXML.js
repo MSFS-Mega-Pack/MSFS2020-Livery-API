@@ -68,7 +68,7 @@ async function getAllFiles(cache) {
             metaGeneration: livery.Guid || null,
             lastModified: livery.LastChanged || null,
             ETag: livery.Guid || null,
-            size: livery.Length || null,
+            size: livery.Length.toString() || null,
             checkSum: checkSum || null,
             image: image || null,
             smallImage: smallImage || null,
