@@ -50,7 +50,6 @@ async function Main() {
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
           if (sum != metadataFile.checkSum) {
             const thumbnails = await getThumbnail(livDir, file, sum);
-            console.log(await getThumbnail(livDir, file, sum));
             console.log(`${file}: Different checksum! Old: ${metadataFile.checkSum} | New: ${sum}`);
             let uploadMetadata = {
               checkSum: sum,
@@ -91,71 +90,71 @@ async function Main() {
  * @param {string} sum
  */
 async function getThumbnail(liveryType, liveryName, sum) {
-  // let result = [];
-  // liveryName = liveryName
-  //   .substring(liveryName.lastIndexOf('/') + 1)
-  //   .trim()
-  //   .replace('.zip', '');F
-  // let dir = `./downloads/${liveryType}/${liveryName}/SimObjects`;
-  // if (!fs.existsSync(dir)) return console.log(dir);
-  // let directories = await GetDirectories(dir);
-  // dir += `/${directories[0]}`;
-  // if (!fs.existsSync(dir)) return console.log(dir);
-  // directories = await GetDirectories(dir);
-  // dir += `/${directories[0]}`;
-  // if (!fs.existsSync(dir)) return console.log(dir);
-  // directories = await GetDirectories(dir);
-  // for (let i = 0; i < directories.length; i++) {
-  //   if (directories[i].includes('TEXTURE.')) {
-  //     directories = directories[i];
-  //     break;
-  //   }
-  // }
-  // dir += `/${directories}`;
-  // await fs.readdir(dir, async (err, files) => {
-  //   await files.forEach(async file => {
-  //     if (file.includes('thumbnail')) {
-  //       const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
-  //       if (dataType.match(/(jpe?g|png|gif)/i)) {
-  //         let dest = `img/${liveryType}/${liveryName}.${dataType}`;
-  //         if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
-  //         try{
-  //         await sharp(`${dir}/${file}`)
-  //           .jpeg({
-  //             progressive: true,
-  //             force: false,
-  //           })
-  //           .png({
-  //             progressive: true,
-  //             force: false,
-  //           })
-  //           .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
-  //             if (!err) {
-  //               uploadFile(
-  //                 `./compressed/${liveryName}${file}`,
-  //                 {
-  //                   checkSum: sum,
-  //                 },
-  //                 dest
-  //               );
-  //               result.push(dest);
-  //             } else {
-  //               uploadFile(
-  //                 `${dir}/${file}`,
-  //                 {
-  //                   checkSum: sum,
-  //                 },
-  //                 dest
-  //               );
-  //               result.push(dest);
-  //             }
-  //           });
-  //       } catch(error){console.log(error)}
-  //       }
-  //     }
-  //   });
-  // });
-  // return result;
+  let result = [];
+  liveryName = liveryName
+    .substring(liveryName.lastIndexOf('/') + 1)
+    .trim()
+    .replace('.zip', '');F
+  let dir = `./downloads/${liveryType}/${liveryName}/SimObjects`;
+  if (!fs.existsSync(dir)) return console.log(dir);
+  let directories = await GetDirectories(dir);
+  dir += `/${directories[0]}`;
+  if (!fs.existsSync(dir)) return console.log(dir);
+  directories = await GetDirectories(dir);
+  dir += `/${directories[0]}`;
+  if (!fs.existsSync(dir)) return console.log(dir);
+  directories = await GetDirectories(dir);
+  for (let i = 0; i < directories.length; i++) {
+    if (directories[i].includes('TEXTURE.')) {
+      directories = directories[i];
+      break;
+    }
+  }
+  dir += `/${directories}`;
+  await fs.readdir(dir, async (err, files) => {
+    await files.forEach(async file => {
+      if (file.includes('thumbnail')) {
+        const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
+        if (dataType.match(/(jpe?g|png|gif)/i)) {
+          let dest = `img/${liveryType}/${liveryName}.${dataType}`;
+          if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
+          try{
+          await sharp(`${dir}/${file}`)
+            .jpeg({
+              progressive: true,
+              force: false,
+            })
+            .png({
+              progressive: true,
+              force: false,
+            })
+            .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
+              if (!err) {
+                uploadFile(
+                  `./compressed/${liveryName}${file}`,
+                  {
+                    checkSum: sum,
+                  },
+                  dest
+                );
+                result.push(dest);
+              } else {
+                uploadFile(
+                  `${dir}/${file}`,
+                  {
+                    checkSum: sum,
+                  },
+                  dest
+                );
+                result.push(dest);
+              }
+            });
+        } catch(error){console.log(error)}
+        }
+      }
+    });
+  });
+  return result;
 }
 
 function addLiverytoDatabase(liveryObject) {
