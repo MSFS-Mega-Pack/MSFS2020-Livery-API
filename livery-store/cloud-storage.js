@@ -203,7 +203,7 @@ async function uploadFile(sourceDirectory, metadata, Destdirectory) {
       });
     });
     // connect to localhost:21 as anonymous
-    c.connect({ host: 'ny.storage.bunnycdn.com', user: 'liveriesinstaller', password: '08f99327-7620-417b-92c3625092ae-acfa-4b6f' });
+    c.connect({ host: process.env.ftpHost, user: process.env.ftpUser, password: process.env.ftpPassword });
   } catch (error) {
     console.log(error);
   }
