@@ -27,6 +27,7 @@
     "deterministic-zip": "^1.1.0",
     "dotenv": "^8.2.0",
     "extract-zip": "^2.0.1",
+    "ftp": "^0.3.10",
     "googleapis": "^59.0.0",
     "mongoose": "^5.10.9",
     "ncp": "^2.0.0",

@@ -23,11 +23,11 @@ async function Main() {
         return console.log('Unable to scan directory: ' + err);
       }
       //listing all files using forEach
-      files.forEach(async function (file) {
+      await AsyncForEach(files, async file => {
         // Do whatever you want to do with the file
         const metadataFile = await getMetadata(`${livDir}/${file}`);
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
-          if (!metadataFile.fileExists || sum != metadataFile.checkSum) {
+          if (sum != metadataFile.checkSum) {
             const thumbnails = await getThumbnail(livDir, file, sum);
             console.log(await getThumbnail(livDir, file, sum));
             console.log(`${file}: Different checksum! Old: ${metadataFile.checkSum} | New: ${sum}`);
@@ -49,12 +49,13 @@ async function Main() {
             } catch (error) {
               console.log(error);
             }
-            uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
+            await uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
           }
         });
       });
     });
   });
+  return;
 }
 
 /**
@@ -180,26 +181,14 @@ function addLiverytoDatabase(liveryObject) {
 }
 
 async function uploadFile(sourceDirectory, metadata, Destdirectory) {
-  const filename = Destdirectory.toString();
   try {
-    const formData = {
-      attachments: [fs.createReadStream(sourceDirectory)],
-    };
-    const request = require('request');
-    request.put(
-      {
-        url: `https://ny.storage.bunnycdn.com/liveriesinstaller/${Destdirectory}`,
-        headers: {
-          AccessKey: process.env.BunnyAPIKey,
-        },
-        formData: formData,
-      },
-      function optionalCallback(err, httpResponse, body) {
-        if (err) {
-          return console.error('upload failed:', err);
-        }
-        console.log('Upload successful!  Server responded with:', body);
-        console.log(`${sourceDirectory} uploaded to ${Destdirectory}.`);
+    const filename = Destdirectory.toString();
+    const Client = require('ftp');
+
+    const c = new Client();
+    c.on('ready', function () {
+      c.put(sourceDirectory, Destdirectory, function (err) {
+        if (err) throw err;
         if (!Destdirectory.toString().startsWith('img')) {
           addLiverytoDatabase({
             airplane: filename.split('/')[0].trim(),
@@ -210,10 +199,13 @@ async function uploadFile(sourceDirectory, metadata, Destdirectory) {
             smallImage: metadata.smallImage,
           });
         }
-      }
-    );
+        c.end();
+      });
+    });
+    // connect to localhost:21 as anonymous
+    c.connect({ host: 'ny.storage.bunnycdn.com', user: 'liveriesinstaller', password: '08f99327-7620-417b-92c3625092ae-acfa-4b6f' });
   } catch (error) {
-    console.log(`Uploading failed for: ${sourceDirectory}\nReason:`, error);
+    console.log(error);
   }
 }
 
@@ -221,13 +213,13 @@ async function getMetadata(filename) {
   // Gets the metadata for the file
   try {
     let metadata = AllLiveriesOnDB.filter(livery => livery.fileName == filename)[0];
-    if (typeof metadata === 'undefined')
+    if (typeof metadata === 'undefined') {
       metadata = {
         checkSum: 0,
+        fileExists: false,
       };
-    return {
-      metadata,
-    };
+    }
+    return metadata;
   } catch (error) {
     return {
       checkSum: 0,
