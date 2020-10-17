@@ -48,7 +48,7 @@ async function Main() {
 
       await new Promise(resolve => {
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
-          if (sum == metadataFile.checkSum) {
+          if (sum != metadataFile.checkSum) {
             const thumbnails = await getThumbnail(livDir, file, sum);
             console.log(`${file}: Different checksum! Old: ${metadataFile.checkSum} | New: ${sum}`);
             let uploadMetadata = {
@@ -91,7 +91,6 @@ async function Main() {
  */
 async function getThumbnail(liveryType, liveryName, sum) {
   let result = [];
-  return new Promise(async function(resolve, reject) {
   liveryName = liveryName
     .substring(liveryName.lastIndexOf('/') + 1)
     .trim()
@@ -112,63 +111,54 @@ async function getThumbnail(liveryType, liveryName, sum) {
     }
   }
   dir += `/${directories}`;
-  await fs.readdir(dir, async (err, files) => {
-    for(let i = 0; i < files.length; i++){
-      const file = files[i]
-      if (file.includes('thumbnail')) {
-        const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
-        if (dataType.match(/(jpe?g|png|gif)/i)) {
-          let dest = `img/${liveryType}/${liveryName}.${dataType}`;
-          if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
-          await processImage(liveryName, file, dest, dir, sum);
+
+  const files = await fs.promises.readdir(dir);
+
+  for (const file of files) {
+    if (file.includes('thumbnail')) {
+      const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
+      if (dataType.match(/(jpe?g|png|gif)/i)) {
+        let dest = `img/${liveryType}/${liveryName}.${dataType}`;
+        if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
+        try {
+          sharp(`${dir}/${file}`)
+            .jpeg({
+              progressive: true,
+              force: false,
+            })
+            .png({
+              progressive: true,
+              force: false,
+            })
+            .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
+              if (!err) {
+                await uploadFile(
+                  `./compressed/${liveryName}${file}`,
+                  {
+                    checkSum: sum,
+                  },
+                  dest
+                );
+                result.push(dest);
+              } else {
+                await uploadFile(
+                  `${dir}/${file}`,
+                  {
+                    checkSum: sum,
+                  },
+                  dest
+                );
+                result.push(dest);
+              }
+            });
+        } catch (error) {
+          console.log(error);
         }
       }
     }
-    resolve();
-  });
-  
-});
-return result;
-}
+  }
 
-async function processImage(liveryName, file, dest, dir, sum){
-  return new Promise(async function(resolve, reject) {
-    try{
-    await sharp(`${dir}/${file}`)
-      .jpeg({
-        progressive: true,
-        force: false,
-      })
-      .png({
-        progressive: true,
-        force: false,
-      })
-      .toFile(`./compressed/${liveryName}${file}`, async (err, info) => {
-        if (!err) {
-          await uploadFile(
-            `./compressed/${liveryName}${file}`,
-            {
-              checkSum: sum,
-            },
-            dest
-          );
-          result.push(dest);
-          resolve();
-        } else {
-          await uploadFile(
-            `${dir}/${file}`,
-            {
-              checkSum: sum,
-            },
-            dest
-          );
-          result.push(dest);
-          resolve();
-        }
-      })
-      
-  } catch(error){console.log(error)}
-});
+  return result;
 }
 
 function addLiverytoDatabase(liveryObject) {
