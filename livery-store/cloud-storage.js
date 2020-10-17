@@ -29,7 +29,6 @@ async function Main() {
   await client.send('TYPE I'); // Binary mode
   await client.sendIgnoringError('STRU F'); // Use file structure
   await client.sendIgnoringError('OPTS UTF8 ON'); // Some servers expect UTF-8 to be enabled explicitly
-
   await LiveryModel.find(function (err, liveries) {
     AllLiveriesOnDB = liveries;
   });
@@ -80,7 +79,7 @@ async function Main() {
       });
     }
   }
-  await client.uploadFromDir('./compressed', './img');
+  await client.uploadFromDir('./compressed');
   return;
 }
 
@@ -131,7 +130,7 @@ async function getThumbnail(liveryType, liveryName, sum) {
               progressive: true,
               force: false,
             })
-            .toFile(`./compressed/${liveryName}${file}`, async (err, info) => {
+            .toFile(`./compressed/img/${liveryName}${file}`, async (err, info) => {
               if (!err) {
                 // await uploadFile(
                 //   `./compressed/${liveryName}${file}`,
