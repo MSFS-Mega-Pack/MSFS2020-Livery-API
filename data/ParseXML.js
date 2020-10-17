@@ -52,8 +52,8 @@ async function getAllFiles(cache) {
         if (smallImage === '0' || smallImage === 'undefined') smallImage = null;
         if (image == null || smallImage == null) {
           const thumbnailFound = await getThumbnail(metadataArray, livery.ObjectName.split('.zip')[0].trim());
-          if (thumbnailFound.Image != null) image = encodeURI(thumbnailFound.Image);
-          if (thumbnailFound.smallImage != null) smallImage = encodeURI(thumbnailFound.smallImage);
+          if (thumbnailFound.Image != null) image = encodeURI(thumbnailFound.Image.split('/liveriesinstaller')[1]);
+          if (thumbnailFound.smallImage != null) smallImage = encodeURI(thumbnailFound.smallImage.split('/liveriesinstaller')[1]);
         }
         try {
           const airplane = livery.Path.split('/liveriesinstaller/')[1].split('/')[0].trim();
