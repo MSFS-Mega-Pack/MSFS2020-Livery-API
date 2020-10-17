@@ -94,7 +94,7 @@ async function getThumbnail(liveryType, liveryName, sum) {
   liveryName = liveryName
     .substring(liveryName.lastIndexOf('/') + 1)
     .trim()
-    .replace('.zip', '');F
+    .replace('.zip', '');
   let dir = `./downloads/${liveryType}/${liveryName}/SimObjects`;
   if (!fs.existsSync(dir)) return console.log(dir);
   let directories = await GetDirectories(dir);
