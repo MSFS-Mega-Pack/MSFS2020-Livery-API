@@ -132,7 +132,7 @@ async function getThumbnail(liveryType, liveryName, sum) {
             })
             .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
               if (!err) {
-                uploadFile(
+                await uploadFile(
                   `./compressed/${liveryName}${file}`,
                   {
                     checkSum: sum,
@@ -141,7 +141,7 @@ async function getThumbnail(liveryType, liveryName, sum) {
                 );
                 result.push(dest);
               } else {
-                uploadFile(
+                await uploadFile(
                   `${dir}/${file}`,
                   {
                     checkSum: sum,
