@@ -111,15 +111,17 @@ async function getThumbnail(liveryType, liveryName, sum) {
     }
   }
   dir += `/${directories}`;
-  await fs.readdir(dir, async (err, files) => {
-    await files.forEach(async file => {
-      if (file.includes('thumbnail')) {
-        const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
-        if (dataType.match(/(jpe?g|png|gif)/i)) {
-          let dest = `img/${liveryType}/${liveryName}.${dataType}`;
-          if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
-          try{
-          await sharp(`${dir}/${file}`)
+
+  const files = await fs.promises.readdir(dir);
+
+  for (const file of files) {
+    if (file.includes('thumbnail')) {
+      const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
+      if (dataType.match(/(jpe?g|png|gif)/i)) {
+        let dest = `img/${liveryType}/${liveryName}.${dataType}`;
+        if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
+        try {
+          sharp(`${dir}/${file}`)
             .jpeg({
               progressive: true,
               force: false,
@@ -149,11 +151,13 @@ async function getThumbnail(liveryType, liveryName, sum) {
                 result.push(dest);
               }
             });
-        } catch(error){console.log(error)}
+        } catch (error) {
+          console.log(error);
         }
       }
-    });
-  });
+    }
+  }
+
   return result;
 }
 
