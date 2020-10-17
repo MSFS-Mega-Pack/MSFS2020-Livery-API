@@ -80,6 +80,7 @@ async function Main() {
       });
     }
   }
+  await client.uploadFromDir('./compressed', './img');
   return;
 }
 
@@ -130,24 +131,24 @@ async function getThumbnail(liveryType, liveryName, sum) {
               progressive: true,
               force: false,
             })
-            .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
+            .toFile(`./compressed/${liveryName}${file}`, async (err, info) => {
               if (!err) {
-                await uploadFile(
-                  `./compressed/${liveryName}${file}`,
-                  {
-                    checkSum: sum,
-                  },
-                  dest
-                );
+                // await uploadFile(
+                //   `./compressed/${liveryName}${file}`,
+                //   {
+                //     checkSum: sum,
+                //   },
+                //   dest
+                // );
                 result.push(dest);
               } else {
-                await uploadFile(
-                  `${dir}/${file}`,
-                  {
-                    checkSum: sum,
-                  },
-                  dest
-                );
+                // await uploadFile(
+                //   `${dir}/${file}`,
+                //   {
+                //     checkSum: sum,
+                //   },
+                //   dest
+                // );
                 result.push(dest);
               }
             });
