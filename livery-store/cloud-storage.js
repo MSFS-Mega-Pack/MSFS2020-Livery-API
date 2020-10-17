@@ -90,39 +90,38 @@ async function Main() {
  * @param {string} sum
  */
 async function getThumbnail(liveryType, liveryName, sum) {
-  try {
-    let result = [];
-    liveryName = liveryName
-      .substring(liveryName.lastIndexOf('/') + 1)
-      .trim()
-      .replace('.zip', '');
-    let dir = `./downloads/${liveryType}/${liveryName}/SimObjects`;
-    if (!fs.existsSync(dir)) return console.log(dir);
-    let directories = await GetDirectories(dir);
-    dir += `/${directories[0]}`;
-    if (!fs.existsSync(dir)) return console.log(dir);
-    directories = await GetDirectories(dir);
-    dir += `/${directories[0]}`;
-    if (!fs.existsSync(dir)) return console.log(dir);
-    directories = await GetDirectories(dir);
-    for (let i = 0; i < directories.length; i++) {
-      if (directories[i].includes('TEXTURE.')) {
-        directories = directories[i];
-        break;
-      }
+  let result = [];
+  liveryName = liveryName
+    .substring(liveryName.lastIndexOf('/') + 1)
+    .trim()
+    .replace('.zip', '');
+  let dir = `./downloads/${liveryType}/${liveryName}/SimObjects`;
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
+  let directories = await GetDirectories(dir);
+  if (directories.length == 0) return console.log(dir);
+  dir += `/${directories[0]}`;
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
+  directories = await GetDirectories(dir);
+  dir += `/${directories[0]}`;
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
+  directories = await GetDirectories(dir);
+  for (let i = 0; i < directories.length; i++) {
+    if (directories[i].includes('TEXTURE.')) {
+      directories = directories[i];
+      break;
     }
-    dir += `/${directories}`;
-
-    const files = await fs.promises.readdir(dir);
-
-    for (const file of files) {
+  }
+  dir += `/${directories}`;
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
+  await fs.readdir(dir, async (err, files) => {
+    await files.forEach(async file => {
       if (file.includes('thumbnail')) {
         const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
         if (dataType.match(/(jpe?g|png|gif)/i)) {
           let dest = `img/${liveryType}/${liveryName}.${dataType}`;
           if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
           try {
-            sharp(`${dir}/${file}`)
+            await sharp(`${dir}/${file}`)
               .jpeg({
                 progressive: true,
                 force: false,
@@ -131,36 +130,20 @@ async function getThumbnail(liveryType, liveryName, sum) {
                 progressive: true,
                 force: false,
               })
-              .toFile(`./compressed/img/${liveryName}${file}`, async (err, info) => {
+              .toFile(`./compressed/img/${liveryName}${file}`, (err, info) => {
                 if (!err) {
-                  // await uploadFile(
-                  //   `./compressed/${liveryName}${file}`,
-                  //   {
-                  //     checkSum: sum,
-                  //   },
-                  //   dest
-                  // );
-                  result.push(dest);
-                } else {
-                  // await uploadFile(
-                  //   `${dir}/${file}`,
-                  //   {
-                  //     checkSum: sum,
-                  //   },
-                  //   dest
-                  // );
+                  console.log(`Compressed imgae for: ${liveryName}`, info);
                   result.push(dest);
                 }
+                console.log(err);
               });
-          } catch (error) {
-            console.log(error);
-          }
+          } catch (error) {}
         }
       }
-    }
+    });
+  });
 
-    return result;
-  } catch (error) {}
+  return result;
 }
 
 function addLiverytoDatabase(liveryObject) {
