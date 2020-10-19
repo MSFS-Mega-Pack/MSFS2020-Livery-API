@@ -8,10 +8,11 @@ module.exports = GetVersion;
 /**
  * @typedef {object} Version
  *
- * @property {string} latest
- * @property {string} date
- * @property {string} downloadUrl
- * @property {int} size
+ * @property {string} latest The latest version available
+ * @property {string} latestAllowed The latest allowed version for auto-updating, fetched from BunnyCDN
+ * @property {string} date The date of the latest release
+ * @property {string} downloadUrl The download URL of the latest setup.exe
+ * @property {int} size The size of the latest setup.exe in bytes
  */
 
 /**

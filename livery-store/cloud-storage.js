@@ -121,7 +121,7 @@ async function getThumbnail(liveryType, liveryName, sum) {
           let dest = `img/${liveryType}/${liveryName}.${dataType}`;
           if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
           try {
-            await sharp(`${dir}/${file}`)
+            const info = await sharp(`${dir}/${file}`)
               .jpeg({
                 progressive: true,
                 force: false,
@@ -129,14 +129,10 @@ async function getThumbnail(liveryType, liveryName, sum) {
               .png({
                 progressive: true,
                 force: false,
-              })
-              .toFile(`./compressed/img/${liveryName}${file}`, (err, info) => {
-                if (!err) {
-                  console.log(`Compressed imgae for: ${liveryName}`, info);
-                  result.push(dest);
-                }
-                console.log(err);
               });
+
+            console.log(`Compressed imgae for: ${liveryName}`, info);
+            result.push(dest);
           } catch (error) {}
         }
       }
