@@ -60,8 +60,6 @@ async function Main() {
           fulfil();
         });
 
-
-
         // zip(
         //   `downloads/${livDir}/${livDirRaw}`,
         //   `public/${livDir}/${livDirRaw}.zip`,

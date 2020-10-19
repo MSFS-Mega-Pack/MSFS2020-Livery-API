@@ -9,7 +9,7 @@ const LiveryModel = require('./Models/livery');
 // const Client = require('ftp');
 const ftp = require('basic-ftp');
 
-const client = new ftp.Client(timeout = 30000 * 2* 3); // 3 min timeout, for safety or so
+const client = new ftp.Client((timeout = 30000 * 2 * 3)); // 3 min timeout, for safety or so
 client.ftp.verbose = true;
 
 // const c = new Client();

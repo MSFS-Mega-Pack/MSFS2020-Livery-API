@@ -129,7 +129,7 @@ async function getFilesFromStorage(url) {
         console.log('Getting ', url.split('https://ny.storage.bunnycdn.com')[1].trim(), body.length);
         for (let i = 0; i < body.length; i++) {
           // console.log(`https://ny.storage.bunnycdn.com${body[i].Path}${body[i].ObjectName}/`, url);
-          if (body[i].IsDirectory && body[i].ObjectName != ".") {
+          if (body[i].IsDirectory && body[i].ObjectName != '.') {
             let returned = await getFilesFromStorage(`https://ny.storage.bunnycdn.com${body[i].Path}${body[i].ObjectName}/`);
             returnObject.liveries = returnObject.liveries.concat(returned.liveries);
             returnObject.img = returnObject.img.concat(returned.img);
