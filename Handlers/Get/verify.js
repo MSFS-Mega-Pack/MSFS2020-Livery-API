@@ -10,7 +10,7 @@ require('dotenv').config();
 async function verifyClient(req, res) {
   const clientData = req.body.info;
   console.log(req.body);
-  if (clientData == undefined || clientData.trim() == "") return res.json({ status: 'failed', data: null });
+  if (clientData == undefined || clientData.trim() == '') return res.json({ status: 'failed', data: null });
   //generate a key pair RSA type encryption with a .pem format
   try {
     const NodeRSA = require('node-rsa');
