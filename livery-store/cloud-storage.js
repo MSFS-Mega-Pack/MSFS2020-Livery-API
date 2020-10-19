@@ -9,7 +9,7 @@ const LiveryModel = require('./Models/livery');
 // const Client = require('ftp');
 const ftp = require('basic-ftp');
 
-const client = new ftp.Client();
+const client = new ftp.Client((timeout = 30000 * 2 * 3)); // 3 min timeout, for safety or so
 client.ftp.verbose = true;
 
 // const c = new Client();
@@ -29,7 +29,6 @@ async function Main() {
   await client.send('TYPE I'); // Binary mode
   await client.sendIgnoringError('STRU F'); // Use file structure
   await client.sendIgnoringError('OPTS UTF8 ON'); // Some servers expect UTF-8 to be enabled explicitly
-
   await LiveryModel.find(function (err, liveries) {
     AllLiveriesOnDB = liveries;
   });
@@ -80,6 +79,7 @@ async function Main() {
       });
     }
   }
+  await client.uploadFromDir('./compressed');
   return;
 }
 
@@ -96,13 +96,14 @@ async function getThumbnail(liveryType, liveryName, sum) {
     .trim()
     .replace('.zip', '');
   let dir = `./downloads/${liveryType}/${liveryName}/SimObjects`;
-  if (!fs.existsSync(dir)) return console.log(dir);
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
   let directories = await GetDirectories(dir);
+  if (directories.length == 0) return console.log(dir);
   dir += `/${directories[0]}`;
-  if (!fs.existsSync(dir)) return console.log(dir);
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
   directories = await GetDirectories(dir);
   dir += `/${directories[0]}`;
-  if (!fs.existsSync(dir)) return console.log(dir);
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
   directories = await GetDirectories(dir);
   for (let i = 0; i < directories.length; i++) {
     if (directories[i].includes('TEXTURE.')) {
@@ -111,16 +112,14 @@ async function getThumbnail(liveryType, liveryName, sum) {
     }
   }
   dir += `/${directories}`;
-
-  const files = await fs.promises.readdir(dir);
-
-  for (const file of files) {
-    if (file.includes('thumbnail')) {
-      const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
-      if (dataType.match(/(jpe?g|png|gif)/i)) {
-        let dest = `img/${liveryType}/${liveryName}.${dataType}`;
-        if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
-        try {
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
+  await fs.readdir(dir, async (err, files) => {
+    await files.forEach(async file => {
+      if (file.includes('thumbnail')) {
+        const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
+        if (dataType.match(/(jpe?g|png|gif)/i)) {
+          let dest = `img/${liveryType}/${liveryName}.${dataType}`;
+          if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
           try {
             const info = await sharp(`${dir}/${file}`)
               .jpeg({
@@ -130,33 +129,15 @@ async function getThumbnail(liveryType, liveryName, sum) {
               .png({
                 progressive: true,
                 force: false,
-              })
-              .toFile(`./compressed/${liveryName}${file}`);
+              });
 
-            await uploadFile(
-              `./compressed/${liveryName}${file}`,
-              {
-                checkSum: sum,
-              },
-              dest
-            );
+            console.log(`Compressed imgae for: ${liveryName}`, info);
             result.push(dest);
-          } catch {
-            await uploadFile(
-              `${dir}/${file}`,
-              {
-                checkSum: sum,
-              },
-              dest
-            );
-            result.push(dest);
-          }
-        } catch (error) {
-          console.log(error);
+          } catch (error) {}
         }
       }
-    }
-  }
+    });
+  });
 
   return result;
 }
