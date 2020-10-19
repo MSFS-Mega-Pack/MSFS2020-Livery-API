@@ -121,36 +121,36 @@ async function getThumbnail(liveryType, liveryName, sum) {
         let dest = `img/${liveryType}/${liveryName}.${dataType}`;
         if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
         try {
-          sharp(`${dir}/${file}`)
-            .jpeg({
-              progressive: true,
-              force: false,
-            })
-            .png({
-              progressive: true,
-              force: false,
-            })
-            .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
-              if (!err) {
-                await uploadFile(
-                  `./compressed/${liveryName}${file}`,
-                  {
-                    checkSum: sum,
-                  },
-                  dest
-                );
-                result.push(dest);
-              } else {
-                await uploadFile(
-                  `${dir}/${file}`,
-                  {
-                    checkSum: sum,
-                  },
-                  dest
-                );
-                result.push(dest);
-              }
-            });
+          try {
+            const info = await sharp(`${dir}/${file}`)
+              .jpeg({
+                progressive: true,
+                force: false,
+              })
+              .png({
+                progressive: true,
+                force: false,
+              })
+              .toFile(`./compressed/${liveryName}${file}`);
+
+            await uploadFile(
+              `./compressed/${liveryName}${file}`,
+              {
+                checkSum: sum,
+              },
+              dest
+            );
+            result.push(dest);
+          } catch {
+            await uploadFile(
+              `${dir}/${file}`,
+              {
+                checkSum: sum,
+              },
+              dest
+            );
+            result.push(dest);
+          }
         } catch (error) {
           console.log(error);
         }
