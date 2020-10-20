@@ -12,6 +12,16 @@ const GetHandlers = require('./Handlers/Get');
 const DefaultHandler = require('./Handlers/default');
 const Constants = require('./Constants');
 const SendResponse = require('./helpers/SendResponse');
+const mongoose = require('mongoose');
+try {
+  mongoose.connect(process.env.MONGOURL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    poolSize: 3,
+  });
+} catch (error) {
+  console.log(error);
+}
 
 let ActiveCache = Cache;
 

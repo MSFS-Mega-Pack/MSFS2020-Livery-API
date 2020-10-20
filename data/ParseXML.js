@@ -2,14 +2,8 @@ const CacheItem = require('../Cache/CacheItem');
 const { CACHE_ENABLED, CDN_URL } = require('../Constants');
 const Constants = require('../Constants');
 const request = require('request');
-const mongoose = require('mongoose');
 const LiveryModel = require('../Models/livery');
 const AllFilesCacheModel = require('../Models/allFilesCache');
-mongoose.connect(process.env.MONGOURL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  poolSize: 3,
-});
 
 require('dotenv').config();
 
@@ -23,16 +17,20 @@ require('dotenv').config();
 async function getAllFiles(cache) {
   if (!CACHE_ENABLED || cache.data.baseManifests.cdnFileListing === null || cache.data.baseManifests.cdnFileListing.hasExpired) {
     const now = Math.round(new Date().getTime() / 1000);
-    const CacheDB = await AllFilesCacheModel.find();
-    if (CacheDB != null && CacheDB.length > 0) {
-      const CachedData = CacheDB[0];
-      if (CachedData.validTill > now) {
-        cache.data.baseManifests.cdnFileListing = new CacheItem({
-          cdnBaseUrl: Constants.CDN_URL,
-          fileList: CachedData.Data,
-        });
-        return [cache.data.baseManifests.cdnFileListing, true];
+    try {
+      const CacheDB = await AllFilesCacheModel.find();
+      if (CacheDB != null && CacheDB.length > 0) {
+        const CachedData = CacheDB[0];
+        if (CachedData.validTill > now) {
+          cache.data.baseManifests.cdnFileListing = new CacheItem({
+            cdnBaseUrl: Constants.CDN_URL,
+            fileList: CachedData.Data,
+          });
+          return [cache.data.baseManifests.cdnFileListing, true];
+        }
       }
+    } catch (error) {
+      console.log(error);
     }
 
     const metadataArray = await getFilesFromStorage('https://ny.storage.bunnycdn.com/liveriesinstaller/');
@@ -80,16 +78,18 @@ async function getAllFiles(cache) {
         }
       }
     }
-    await AllFilesCacheModel.remove();
-    const cacheModel = new AllFilesCacheModel({
-      createdAt: now,
-      validTill: now + 60 * 10,
-      Data: fileListing,
-    });
-    cacheModel.save(function (err, result) {
-      if (err) return console.log(err);
-      console.log(`Saved cache model!`);
-    });
+    try {
+      await AllFilesCacheModel.remove();
+      const cacheModel = new AllFilesCacheModel({
+        createdAt: now,
+        validTill: now + 60 * 10,
+        Data: fileListing,
+      });
+      cacheModel.save(function (err, result) {
+        if (err) return console.log(err);
+        console.log(`Saved cache model!`);
+      });
+    } catch (error) {}
     cache.data.baseManifests.cdnFileListing = new CacheItem({
       cdnBaseUrl: Constants.CDN_URL,
       fileList: fileListing,
