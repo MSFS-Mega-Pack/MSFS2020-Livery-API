@@ -5,6 +5,7 @@ const visitSchema = new Schema(
   {
     createdAt: Number,
     UUID: String,
+    Date: Date,
   },
   {
     timestamps: {

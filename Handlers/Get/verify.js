@@ -23,6 +23,7 @@ async function verifyClient(req, res) {
       const visit = new visitModel({
         createdAt: now,
         UUID: decrypted,
+        Date: new Date().toISOString(),
       });
       visit.save(function (err, result) {
         if (err) return console.log(err);
