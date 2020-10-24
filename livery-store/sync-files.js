@@ -14,19 +14,24 @@ const prefixes = [
   'Asobo_A320_NEO',
   'Asobo_B747',
   'Asobo_b787',
+  'Asobo_Baron',
   'Asobo_C152',
   'Asobo_C172sp',
+  'Asobo_Cap10c',
   'Asobo_CJ4',
   'Asobo_DA40',
   'Asobo_DA62',
+  'Asobo_DR400',
   'Asobo_E330',
   'Asobo_Icon',
   'Asobo_KingAir350',
+  'Asobo_Longitude',
   'Asobo_Pitts',
   'Asobo_Savage_Cub',
+  'Asobo_SR22',
   'Asobo_TBM930',
-  'Asobo_XCub',
-  'Asobo_Longitude'
+  'Asobo_VL3',
+  'Asobo_XCub'
 ];
 const { readdir, stat, mkdir } = require('fs').promises;
 
