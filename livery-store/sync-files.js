@@ -26,6 +26,7 @@ const prefixes = [
   'Asobo_Savage_Cub',
   'Asobo_TBM930',
   'Asobo_XCub',
+  'Asobo_Longitude'
 ];
 const { readdir, stat, mkdir } = require('fs').promises;
 
