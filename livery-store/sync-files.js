@@ -127,7 +127,9 @@ async function moveFolders() {
           recursive: true,
         });
       }
-      ncp(`./liverypackUnzip/LiveriesMegaPack/${livDir}`, `./downloads/${destFolder}/${livDir}`, async function (err) {
+      let livDirDest = livDir;
+      livDirDest = livDirDest.replace(/\s/g, '_');
+      ncp(`./liverypackUnzip/LiveriesMegaPack/${livDir}`, `./downloads/${destFolder}/${livDirDest}`, async function (err) {
         if (err) {
           return console.error(err);
         }
