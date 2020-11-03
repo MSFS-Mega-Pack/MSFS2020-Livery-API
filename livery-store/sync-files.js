@@ -32,6 +32,7 @@ const prefixes = [
   'Asobo_TBM930',
   'Asobo_VL3',
   'Asobo_XCub',
+  'Asobo_Bonanza',
 ];
 const { readdir, stat, mkdir } = require('fs').promises;
 
@@ -42,7 +43,7 @@ async function Start() {
   await fs.rmdirSync(`./liverypackDownloads`, { recursive: true });
   await fs.rmdirSync(`./public`, { recursive: true });
   const Directory = `./liverypackDownloads/`;
-  const downloadURL = 'https://liveriesmegapack.b-cdn.net/LiveriesMegaPack.zip';
+  const downloadURL = 'https://liveriesmegapack.com/LiveriesMegaPackVersion11.3.zip';
   const zipName = downloadURL.substr(downloadURL.lastIndexOf('/') + 1);
   const zipPath = Path.join(Directory, zipName);
   const extract = require('extract-zip');
@@ -118,7 +119,7 @@ async function Start() {
 }
 
 async function moveFolders() {
-  const liveryPaths = await GetDirectories('./liverypackUnzip/LiveriesMegaPack/');
+  const liveryPaths = await GetDirectories('./liverypackUnzip/');
   await AsyncForEach(liveryPaths, async (livDir, i) => {
     const destFolder = getAircraftByPrefix(livDir);
     if (destFolder != undefined) {
@@ -129,12 +130,12 @@ async function moveFolders() {
       }
       let livDirDest = livDir;
       livDirDest = livDirDest.replace(/\s/g, '_');
-      ncp(`./liverypackUnzip/LiveriesMegaPack/${livDir}`, `./downloads/${destFolder}/${livDirDest}`, async function (err) {
+      ncp(`./liverypackUnzip/${livDir}`, `./downloads/${destFolder}/${livDirDest}`, async function (err) {
         if (err) {
           return console.error(err);
         }
         console.log('done!');
-        await fs.rmdirSync(`./liverypackUnzip/LiveriesMegaPack/${livDir}`, { recursive: true });
+        await fs.rmdirSync(`./liverypackUnzip/${livDir}`, { recursive: true });
       });
     }
   });
