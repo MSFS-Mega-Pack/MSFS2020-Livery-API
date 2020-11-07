@@ -16,7 +16,6 @@ async function PackRouter(req, res, cache) {
   subPack = cacheItem.data;
 
   SendResponse.JSON(res, subPack, wasCached, cacheItem.cachedAt, cacheItem.expires);
-  break;
 }
 
 module.exports = PackRouter;

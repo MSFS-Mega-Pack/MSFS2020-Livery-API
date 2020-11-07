@@ -14,6 +14,7 @@ module.exports = FetchPack;
 async function FetchPack(cache, packName) {
   if (!CACHE_ENABLED || !cache.data.baseManifests.subpackItems[packName] || cache.data.baseManifests.subpackItems[packName].hasExpired) {
     let s = await RefetchPack(packName);
+    s = JSON.parse(s);
 
     if (s === null) {
       if (cache.data.baseManifests.subpackItems[packName]) {

@@ -57,7 +57,7 @@ app.get(`/${Constants.API_VERSION}/get/update/:v`, (req, res) => GetHandlers.IsU
 app.get(`/${Constants.API_VERSION}/get/update`, (req, res) => GetHandlers.IsUpdateAvailable(req, res, ActiveCache));
 app.post(`/${Constants.API_VERSION}/get/verify/`, (req, res) => GetHandlers.verifyClient(req, res));
 app.get(`/${Constants.API_VERSION}/get/subpack/pack/:packName`, (req, res) => GetHandlers.GetPack(req, res, ActiveCache));
-app.get(`/${Constants.API_VERSION}/get/subpack/`, (req, res) => GetHandlers.Pack(req, res, ActiveCache));
+app.get(`/${Constants.API_VERSION}/get/subpack`, (req, res) => GetHandlers.Pack(req, res, ActiveCache));
 
 app.get('*', (req, res) => DefaultHandler(req, res, ActiveCache));
 

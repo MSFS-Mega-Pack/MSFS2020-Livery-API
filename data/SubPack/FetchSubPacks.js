@@ -31,12 +31,11 @@ module.exports = FetchSubPacks;
 async function FetchSubPacks(cache) {
   if (!CACHE_ENABLED || cache.data.baseManifests.feed === null || cache.data.baseManifests.feed.hasExpired) {
     let s = await FetchLatestSubPacks();
-
     if (s === null) {
       Log("Couldn't fetch updated feed! Re-using old one.");
       return [cache.data.baseManifests.subpack, true];
     } else {
-      cache.data.baseManifests.feed = new CacheItem(s, true, true);
+      cache.data.baseManifests.subpack = new CacheItem(s, true, true);
       return [cache.data.baseManifests.subpack, false];
     }
   } else {
