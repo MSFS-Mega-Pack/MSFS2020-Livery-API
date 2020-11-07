@@ -4,4 +4,6 @@ module.exports = {
   GetArticle: require('./Feed/GetArticle'),
   IsUpdateAvailable: require('./IsUpdateAvailable'),
   verifyClient: require('./verify'),
+  GetPack: require('./SubPacks/GetPack'),
+  Pack: require('./SubPacks').PackRouter,
 };
