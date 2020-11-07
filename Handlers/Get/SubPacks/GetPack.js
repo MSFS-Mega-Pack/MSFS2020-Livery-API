@@ -1,4 +1,4 @@
-const FetchArticle = require('../../../data/article/FetchArticle');
+const FetchPack = require('../../../data/SubPack/FetchPack');
 const SendResponse = require('../../../helpers/SendResponse');
 
 /**
@@ -7,11 +7,11 @@ const SendResponse = require('../../../helpers/SendResponse');
  * @param {import('../Cache/Cache').ActiveCache} cache Active cache
  */
 async function GetPack(req, res, cache) {
-  const articleName = req.params.articleName;
+  const packName = req.params.packName;
 
-  const [article, wasCached] = await FetchArticle(cache, articleName);
+  const [pack, wasCached] = await FetchPack(cache, packName);
 
-  SendResponse.JSON(res, article.data, wasCached, article.cachedAt, article.expires);
+  SendResponse.JSON(res, pack.data, wasCached, pack.cachedAt, pack.expires);
 }
 
 module.exports = GetPack;

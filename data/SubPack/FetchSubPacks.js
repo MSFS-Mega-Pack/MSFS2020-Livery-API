@@ -6,20 +6,21 @@ const { CACHE_ENABLED } = require('../../Constants');
 module.exports = FetchSubPacks;
 
 /**
- * @typedef {object} FeedItem
+ * @typedef {object} SubPackItem
  *
  * @property {string} date
  * @property {string} title
  * @property {string} author
- * @property {string} article
+ * @property {string} packName
+ * @property {number} version
  */
 
 /**
  * @typedef {object} Feed
  *
- * @property {FeedItem[]} feed
+ * @property {SubPackItem[]} packs
  * @property {number} formatVersion
- * @property {'feed'} formatType
+ * @property {'packs'} formatType
  */
 
 /**
@@ -33,12 +34,12 @@ async function FetchSubPacks(cache) {
 
     if (s === null) {
       Log("Couldn't fetch updated feed! Re-using old one.");
-      return [cache.data.baseManifests.feed, true];
+      return [cache.data.baseManifests.subpack, true];
     } else {
       cache.data.baseManifests.feed = new CacheItem(s, true, true);
-      return [cache.data.baseManifests.feed, false];
+      return [cache.data.baseManifests.subpack, false];
     }
   } else {
-    return [cache.data.baseManifests.feed, true];
+    return [cache.data.baseManifests.subpack, true];
   }
 }

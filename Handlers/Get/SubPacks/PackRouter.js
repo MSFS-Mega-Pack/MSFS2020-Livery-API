@@ -9,21 +9,15 @@ const SendResponse = require('../../../helpers/SendResponse');
  */
 async function PackRouter(req, res, cache) {
 
-  let cacheItem, wasCached, feed, feedToSend;
+  let cacheItem, wasCached, subPack;
 
       [cacheItem, wasCached] = await FetchSubPacks(cache);
 
-      /** @type {import('../../../data/feed/FetchSubPacks').Feed} */
-      feed = cacheItem.data;
-
-      // send a MAX of 3 articles!
-      feedToSend = {
-        ...feed,
-        isMoreHistoryAvailable: feed.feed.length > 3,
-        feed: feed.feed.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 3),
+      /** @type {import('../../../data/SubPack/FetchSubPacks').SubPackItem} */
+      subPack = cacheItem.data;
       };
 
-      SendResponse.JSON(res, feedToSend, wasCached, cacheItem.cachedAt, cacheItem.expires);
+      SendResponse.JSON(res, subPack, wasCached, cacheItem.cachedAt, cacheItem.expires);
       break;
 }
 
