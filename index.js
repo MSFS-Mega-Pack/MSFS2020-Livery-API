@@ -58,6 +58,7 @@ app.get(`/${Constants.API_VERSION}/get/update`, (req, res) => GetHandlers.IsUpda
 app.post(`/${Constants.API_VERSION}/get/verify/`, (req, res) => GetHandlers.verifyClient(req, res));
 app.get(`/${Constants.API_VERSION}/get/subpack/pack/:packName`, (req, res) => GetHandlers.GetPack(req, res, ActiveCache));
 app.get(`/${Constants.API_VERSION}/get/subpack`, (req, res) => GetHandlers.Pack(req, res, ActiveCache));
+app.get(`/${Constants.API_VERSION}/get/addLiveryStat/:livery`, (req, res) => GetHandlers.addLiveryStat(req, res));
 
 app.get('*', (req, res) => DefaultHandler(req, res, ActiveCache));
 
