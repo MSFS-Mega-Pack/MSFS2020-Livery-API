@@ -13,7 +13,7 @@ async function GetLatestVersion() {
 
   let res1 = res.clone();
 
-  if (res1.ok !== 200) {
+  if (!res1.ok) {
     Log('Failed to fetch latest version JSON', Log.SEVERITY.ERROR);
     return null;
   }
