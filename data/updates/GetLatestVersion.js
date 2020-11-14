@@ -4,19 +4,23 @@ const Log = require('../../logger');
 module.exports = GetLatestVersion;
 
 async function GetLatestVersion() {
-  const maxVersionRes = await fetch('https://liveriesmegapack.b-cdn.net/current_version.txt');
-  const res = await fetch(`https://api.github.com/repos/MSFS-Mega-Pack/MSFS2020-livery-manager/releases/latest`);
+  const maxVersionRes = await fetch('https://liveriesmegapack.b-cdn.net/current_version.txt', {
+    headers: {
+      'Cache-Control': 'no-cache'
+    }
+  });
+  const res = await fetch('https://api.github.com/repos/MSFS-Mega-Pack/MSFS2020-livery-manager/releases/latest');
 
   let res1 = res.clone();
 
-  if (res1.status !== 200) {
+  if (res1.ok !== 200) {
     Log('Failed to fetch latest version JSON', Log.SEVERITY.ERROR);
     return null;
   }
 
   let maxVersion = '9999.0.0';
 
-  if (maxVersionRes.status !== 200) {
+  if (!maxVersionRes.ok) {
     Log(
       "Failed to fetch latest allowed version from Clink's CDN. We will assume that we can update to the latest version.",
       Log.SEVERITY.WARNING
@@ -29,6 +33,7 @@ async function GetLatestVersion() {
 
   return {
     latestAllowed: maxVersion,
+    latestAllowedStatusCode: res1.status,
     latest: jsonRelease.tag_name.substr(1), // get version without "v" at the start
     downloadUrl: jsonRelease.assets.filter(asset => asset.name.endsWith('.exe'))[0].browser_download_url,
     date: jsonRelease.published_at,
