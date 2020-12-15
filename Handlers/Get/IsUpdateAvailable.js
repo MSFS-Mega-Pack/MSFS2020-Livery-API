@@ -3,6 +3,7 @@ const SendResponse = require('../../helpers/SendResponse');
 const GetVersion = require('../../data/updates/GetVersion');
 const semver = require('semver');
 const { default: fetch } = require('node-fetch');
+const { USE_UPDATE_JSON_FROM_CDN } = require('../../Constants');
 
 /**
  * @param {import('express').Request} req
@@ -17,13 +18,13 @@ async function IsUpdateAvailable(req, res, cache) {
 
   /** @type {import('../../data/updates/GetVersion').Version} */
   let latestVersion = cacheItem.data;
-  // latestVersion.latestAllowed = '0.2.0';
 
-  const latestAllowedUrl = latestVersion.downloadUrl.replace(new RegExp(`(${latestVersion.latest})`, 'g'), latestVersion.latestAllowed);
-  // console.log(latestAllowedUrl);
+  const latestAllowedUrl = USE_UPDATE_JSON_FROM_CDN
+    ? latestVersion.downloadUrl.replace(new RegExp(`(${latestVersion.latest})`, 'g'), latestVersion.latestAllowed)
+    : null;
 
   if (typeof clientVersion === 'undefined') {
-    if (semver.lt(latestVersion.latestAllowed, latestVersion.latest)) {
+    if (USE_UPDATE_JSON_FROM_CDN && semver.lt(latestVersion.latestAllowed, latestVersion.latest)) {
       SendResponse.JSON(
         res,
         { latest: latestVersion.latestAllowed, downloadUrl: latestAllowedUrl, size: null, date: null, realLatest: latestVersion.latest },
@@ -37,7 +38,7 @@ async function IsUpdateAvailable(req, res, cache) {
   } else {
     try {
       const updateAvailable = semver.lt(semver.clean(clientVersion), latestVersion.latest);
-      const allowedToUpdate = semver.gte(latestVersion.latestAllowed, latestVersion.latest);
+      const allowedToUpdate = USE_UPDATE_JSON_FROM_CDN ? semver.gte(latestVersion.latestAllowed, latestVersion.latest) : true;
 
       if (updateAvailable) {
         if (allowedToUpdate) {
