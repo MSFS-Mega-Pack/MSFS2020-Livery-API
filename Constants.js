@@ -4,5 +4,5 @@ module.exports = Object.freeze({
   CACHE_TTL: 1000 * 60 * 5,
   GIT_RAW_URL: `https://raw.githubusercontent.com/MSFS-Mega-Pack/MSFS2020-livery-sources/master`,
   CACHE_ENABLED: true,
-  CDN_URL: `https://manager-cdn.liveriesmegapack.com`,
+  CDN_URL: `https://manager-cdn.projectmegapack.com`,
 });
