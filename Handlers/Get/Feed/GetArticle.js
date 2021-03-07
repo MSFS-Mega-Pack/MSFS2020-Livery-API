@@ -11,7 +11,7 @@ async function GetArticle(req, res, cache) {
 
   const [article, wasCached] = await FetchArticle(cache, articleName);
 
-  SendResponse.JSON(res, article.data, wasCached, article.cachedAt);
+  SendResponse.JSON(res, article.data, wasCached, article.cachedAt, article.expires);
 }
 
 module.exports = GetArticle;

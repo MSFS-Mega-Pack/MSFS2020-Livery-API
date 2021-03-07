@@ -1,46 +1,62 @@
-const bucketName = 'msfsliverypack';
+console.log('It is upload time!');
 const fs = require('fs');
 const { readdir, stat } = require('fs').promises;
 require('dotenv').config();
 let checksum = require('checksum');
 const sharp = require('sharp');
+const mongoose = require('mongoose');
+const LiveryModel = require('./Models/livery');
+// const Client = require('ftp');
+const ftp = require('basic-ftp');
 
-const { Storage } = require('@google-cloud/storage');
+const client = new ftp.Client((timeout = 30000 * 2 * 3)); // 3 min timeout, for safety or so
+client.ftp.verbose = true;
 
-const projectId = process.env.PROJECT_ID_storage;
-const client_email = process.env.CLIENT_EMAIL_storage;
-const private_key = process.env.PRIVATE_KEY_storage.replace(/\\n/gm, '\n');
-
-// Creates a client
-const storage = new Storage({
-  projectId,
-  credentials: {
-    client_email,
-    private_key,
-  },
+// const c = new Client();
+console.log('Loaded all the modules');
+mongoose.connect(process.env.MONGOURL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  poolSize: 3,
 });
+let AllLiveriesOnDB = [];
+// c.connect({ host: process.env.ftpHost, user: process.env.ftpUser, password: process.env.ftpPassword });
+console.log('Ready, set, go!');
 async function Main() {
+  await client.connect(process.env.ftpHost, 21);
+  await client.login(process.env.ftpUser, process.env.ftpPassword);
+
+  await client.send('TYPE I'); // Binary mode
+  await client.sendIgnoringError('STRU F'); // Use file structure
+  await client.sendIgnoringError('OPTS UTF8 ON'); // Some servers expect UTF-8 to be enabled explicitly
+  await LiveryModel.find(function (err, liveries) {
+    AllLiveriesOnDB = liveries;
+  });
+
   const liveryPaths = await GetDirectories('./public');
-  await AsyncForEach(liveryPaths, async livDir => {
-    fs.readdir(`./public/${livDir}`, async function (err, files) {
-      if (err) {
-        return console.log('Unable to scan directory: ' + err);
-      }
-      //listing all files using forEach
-      files.forEach(async function (file) {
-        // Do whatever you want to do with the file
-        const metadataFile = await getMetadata(`${livDir}/${file}`);
+  for (let i = 0; i < liveryPaths.length; i++) {
+    const livDir = liveryPaths[i];
+    const files = await fs.promises.readdir(`./public/${livDir}`);
+
+    //listing all files using forEach
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
+      console.log(file);
+      // Do whatever you want to do with the file
+      const metadataFile = await getMetadata(`${livDir}/${file}`);
+
+      await new Promise(resolve => {
         checksum.file(`./public/${livDir}/${file}`, async function (err, sum) {
-          if (!metadataFile.fileExists || sum != metadataFile.metadata.metadata.checkSum) {
+          if (sum != metadataFile.checkSum) {
             const thumbnails = await getThumbnail(livDir, file, sum);
-            console.log(`${file}: Different checksum! Old: ${metadataFile.metadata.metadata.checkSum} | New: ${sum}`);
+            console.log(`${file}: Different checksum! Old: ${metadataFile.checkSum} | New: ${sum}`);
             let uploadMetadata = {
               checkSum: sum,
-              smallImage: 0,
-              Image: 0,
+              smallImage: null,
+              Image: null,
             };
             try {
-              if (thumbnails.length != 0) {
+              if (thumbnails && thumbnails.length != 0) {
                 for (let i = 0; i < thumbnails.length; i++) {
                   if (thumbnails[i].toString().includes('small')) {
                     uploadMetadata.smallImage = thumbnails[i].toString();
@@ -52,12 +68,19 @@ async function Main() {
             } catch (error) {
               console.log(error);
             }
-            uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
+            await uploadFile(`./public/${livDir}/${file}`, uploadMetadata, `${livDir}/${file}`);
+          } else {
+            console.log('Same checksum');
           }
+          // let x = await client.sendIgnoringError('NOOP');
+          // console.log(x);
+          resolve();
         });
       });
-    });
-  });
+    }
+  }
+  await client.uploadFromDir('./compressed');
+  return;
 }
 
 /**
@@ -72,15 +95,15 @@ async function getThumbnail(liveryType, liveryName, sum) {
     .substring(liveryName.lastIndexOf('/') + 1)
     .trim()
     .replace('.zip', '');
-
   let dir = `./downloads/${liveryType}/${liveryName}/SimObjects`;
-  if (!fs.existsSync(dir)) return console.log(dir);
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
   let directories = await GetDirectories(dir);
+  if (directories.length == 0) return console.log(dir);
   dir += `/${directories[0]}`;
-  if (!fs.existsSync(dir)) return console.log(dir);
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
   directories = await GetDirectories(dir);
   dir += `/${directories[0]}`;
-  if (!fs.existsSync(dir)) return console.log(dir);
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
   directories = await GetDirectories(dir);
   for (let i = 0; i < directories.length; i++) {
     if (directories[i].includes('TEXTURE.')) {
@@ -88,100 +111,124 @@ async function getThumbnail(liveryType, liveryName, sum) {
       break;
     }
   }
-
   dir += `/${directories}`;
-  fs.readdir(dir, async (err, files) => {
-    files.forEach(async file => {
+  if (!fs.existsSync(dir) || !fs.lstatSync(dir).isDirectory()) return console.log(dir);
+  await fs.readdir(dir, async (err, files) => {
+    await files.forEach(async file => {
       if (file.includes('thumbnail')) {
         const dataType = file.substr(file.lastIndexOf('.') + 1).trim();
-
         if (dataType.match(/(jpe?g|png|gif)/i)) {
           let dest = `img/${liveryType}/${liveryName}.${dataType}`;
           if (file.includes('_small')) dest = `img/${liveryType}/${liveryName}_small.${dataType}`;
-          sharp(`${dir}/${file}`)
-            .jpeg({
-              progressive: true,
-              force: false,
-            })
-            .png({
-              progressive: true,
-              force: false,
-            })
-            .toFile(`./compressed/${liveryName}${file}`, (err, info) => {
-              if (!err) {
-                uploadFile(
-                  `./compressed/${liveryName}${file}`,
-                  {
-                    checkSum: sum,
-                  },
-                  dest
-                );
-                result.push(dest);
-              } else {
-                uploadFile(
-                  `${dir}/${file}`,
-                  {
-                    checkSum: sum,
-                  },
-                  dest
-                );
-                result.push(dest);
-              }
-            });
+          try {
+            fs.existsSync(`./compressed/img/${liveryType}`) || fs.mkdirSync(`./compressed/img/${liveryType}`);
+            const info = await sharp(`${dir}/${file}`)
+              .jpeg({
+                progressive: true,
+                force: false,
+              })
+              .png({
+                progressive: true,
+                force: false,
+              })
+              .toFile(`./compressed/${dest}`, (err, info) => {
+                console.log(err);
+              });
+
+            console.log(`Compressed image for: ${liveryName}`, info);
+            result.push(dest);
+          } catch (error) {}
         }
       }
     });
   });
+
   return result;
 }
 
-async function uploadFile(sourceDirectory, metadata, Destdirectory) {
-  //await getMetadata(Destdirectory);
-  // Uploads a local file to the bucket
-  try {
-    await storage.bucket(bucketName).upload(sourceDirectory, {
-      destination: Destdirectory,
-      // Support for HTTP requests made with `Accept-Encoding: gzip`
-      gzip: true,
-      // By setting the option `destination`, you can change the name of the
-      // object you are uploading to a bucket.
-      metadata: {
-        // Enable long-lived HTTP caching headers
-        // Use only if the contents of the file will never change
-        // (If the contents will change, use cacheControl: 'no-cache')
-        cacheControl: 'public, max-age=31536000',
-        metadata,
-      },
-    });
+function addLiverytoDatabase(liveryObject) {
+  LiveryModel.findOne(
+    {
+      fileName: liveryObject.filename,
+    },
+    function (err, result) {
+      if (err) return res.send(err);
+      if (result != null) {
+        LiveryModel.updateOne(
+          {
+            fileName: liveryObject.filename,
+          },
+          {
+            airplane: liveryObject.airplane,
+            fileName: liveryObject.filename,
+            generation: Math.round(new Date().getTime() / 1000),
+            size: liveryObject.size,
+            checkSum: liveryObject.checkSum,
+            image: liveryObject.image,
+            smallImage: liveryObject.smallImage,
+          },
+          {
+            upsert: true,
+          },
+          function (err, result) {
+            console.log(`Updated ${liveryObject.fileName}`, result);
+          }
+        );
+      } else {
+        const newLivery = new LiveryModel({
+          airplane: liveryObject.airplane,
+          fileName: liveryObject.filename,
+          generation: Math.round(new Date().getTime() / 1000),
+          size: liveryObject.size,
+          checkSum: liveryObject.checkSum,
+          image: liveryObject.image,
+          smallImage: liveryObject.smallImage,
+        });
+        newLivery.save(function (err, result) {
+          if (err) return console.log(err);
+          console.log(`Inserted ${liveryObject.fileName}`, result);
+        });
+      }
+    }
+  );
+}
 
-    console.log(`${sourceDirectory} uploaded to ${Destdirectory}.`);
-  } catch (error) {
-    console.log(`Uploading failed for: ${sourceDirectory}\nReason:`, error);
+async function uploadFile(sourceDirectory, metadata, Destdirectory) {
+  const filename = Destdirectory.toString();
+
+  console.log('UPLOADING ' + sourceDirectory);
+  await client.uploadFrom(sourceDirectory, Destdirectory);
+  console.log('AFTER');
+
+  if (!Destdirectory.toString().startsWith('img')) {
+    await new Promise(resolve => {
+      addLiverytoDatabase({
+        airplane: filename.split('/')[0].trim(),
+        filename: filename,
+        size: fs.statSync(sourceDirectory).size,
+        checkSum: metadata.checkSum,
+        image: metadata.Image,
+        smallImage: metadata.smallImage,
+      });
+      resolve();
+    });
   }
 }
 
 async function getMetadata(filename) {
   // Gets the metadata for the file
   try {
-    const [metadata] = await storage.bucket(bucketName).file(filename).getMetadata();
-    if (typeof metadata.metadata === 'undefined')
+    let metadata = AllLiveriesOnDB.filter(livery => livery.fileName == filename)[0];
+    if (typeof metadata === 'undefined') {
       metadata = {
-        metadata: {
-          checkSum: 0,
-        },
+        checkSum: 0,
+        fileExists: false,
       };
-    return {
-      fileExists: true,
-      metadata,
-    };
+    }
+    return metadata;
   } catch (error) {
     return {
-      fileExists: false,
-      metadata: {
-        metadata: {
-          checkSum: 0,
-        },
-      },
+      checkSum: 0,
     };
   }
 }
@@ -206,4 +253,5 @@ async function AsyncForEach(arr, callback) {
 const GetDirectories = async (path = '.') =>
   (await stat(path)).isDirectory() ? Promise.all(await readdir(path)).then(results => [].concat(...results)) : [];
 
+console.log('And we are live :)');
 Main();

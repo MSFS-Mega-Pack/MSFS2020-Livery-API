@@ -4,6 +4,7 @@ const Constants = require('../Constants');
 const Headers = {
   wasCached: 'X-response-was-cached',
   cachedAtTime: 'X-response-cached-at',
+  expiresAtTime: 'X-response-expires-at',
   cacheTTL: 'X-response-cache-ttl',
   cacheExpiresIn: 'X-response-cache-expires-in',
 };
@@ -15,7 +16,7 @@ const Headers = {
  * @param {number} cachedAt A timestamp of when this CacheItem was saved
  * @param {number} [statusCode=200] Status code to be returned
  */
-function SendJSONResponse(res, data, wasCached, cachedAt = null, statusCode = 200) {
+function SendJSONResponse(res, data, wasCached, cachedAt = null, expiresAt = null, statusCode = 200) {
   let now = new Date();
 
   if (wasCached) {
@@ -24,9 +25,10 @@ function SendJSONResponse(res, data, wasCached, cachedAt = null, statusCode = 20
 
     if (cachedAt) {
       res.setHeader(Headers.cachedAtTime, cachedAt);
+      res.setHeader(Headers.expiresAtTime, expiresAt);
       // res.setHeader(Headers.cacheExpiresIn, now.getTime() - cachedAt - Constants.CACHE_TTL);
     } else {
-      res.setHeader(Headers.cachedAtTime, 'unknown');
+      // res.setHeader(Headers.cachedAtTime, 'unknown');
       // res.setHeader(Headers.cacheExpiresIn, 'unknown');
     }
   }
@@ -38,7 +40,7 @@ function SendJSONResponse(res, data, wasCached, cachedAt = null, statusCode = 20
   return res.status(statusCode).json({
     cached: wasCached || false,
     cachedAt: cachedAt || null,
-    cacheTTL: Constants.CACHE_TTL,
+    expiresAt: expiresAt || null,
     data: data,
   });
 }

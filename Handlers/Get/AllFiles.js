@@ -17,7 +17,7 @@ async function Get_AllItems(req, res, cache) {
 
   cached && Log(`Livery zip list was cached! Woohoo!`, Log.SEVERITY.DEBUG);
 
-  return SendResponse.JSON(res, cacheItem.data, cached, cacheItem.cachedAt);
+  return SendResponse.JSON(res, cacheItem.data, cached, cacheItem.cachedAt, cacheItem.expires);
 }
 
 module.exports = Get_AllItems;

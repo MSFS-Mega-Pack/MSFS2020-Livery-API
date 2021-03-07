@@ -29,6 +29,12 @@ async function Main() {
     const liveryPathsRaw = await GetDirectories(`./downloads/${livDir}`);
     await AsyncForEach(liveryPathsRaw, async (livDirRaw, index) => {
       return new Promise(fulfil => {
+        let archive = archiver('zip', {
+          zlib: {
+            level: 9,
+            memLevel: 9,
+          }, // Sets the compression level.
+        });
         console.log(chalk.grey.bold('='.repeat(60)));
         console.log(chalk.blue.bold(CenterText(`Zipping livery (${index + 1} of ${liveryPathsRaw.length})`)));
         console.log(chalk.whiteBright(CenterText(`${livDirRaw}.zip`)));
@@ -42,17 +48,26 @@ async function Main() {
         }
 
         console.log(chalk.bold(CenterText('Creating file stream...')));
+        const output = createWriteStream(`public/${livDir}/${livDirRaw}.zip`, {
+          autoClose: true,
+        });
+        archive.pipe(output);
 
         console.log(chalk.bold(CenterText('Archiving...')));
         console.log(chalk.grey(CenterText('This might take a while...')));
-        zip(
-          `downloads/${livDir}/${livDirRaw}`,
-          `public/${livDir}/${livDirRaw}.zip`,
-          { includes: ['./**'], cwd: `downloads/${livDir}/${livDirRaw}` },
-          err => {
-            fulfil();
-          }
-        );
+        archive.directory(`downloads/${livDir}/${livDirRaw}`, false).finalize();
+        output.on('finish', () => {
+          fulfil();
+        });
+
+        // zip(
+        //   `downloads/${livDir}/${livDirRaw}`,
+        //   `public/${livDir}/${livDirRaw}.zip`,
+        //   { includes: ['./**'], cwd: `downloads/${livDir}/${livDirRaw}` },
+        //   err => {
+        //     fulfil();
+        //   }
+        // );
       });
     });
   });

@@ -65,7 +65,7 @@ class CacheItem {
   constructor(data, usableIfStale = true, permacache = true) {
     this.data = data;
     this.cachedAt = new Date().getTime();
-    this.expires = new Date().getTime() + (permacache ? 1000 * 60 * 60 * 24 : CACHE_TTL);
+    this.expires = new Date().getTime() + (permacache ? 1000 * 60 * 60 : CACHE_TTL);
     this.usableIfStale = usableIfStale;
   }
 }

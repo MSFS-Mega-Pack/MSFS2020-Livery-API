@@ -14,18 +14,25 @@ const prefixes = [
   'Asobo_A320_NEO',
   'Asobo_B747',
   'Asobo_b787',
+  'Asobo_Baron',
   'Asobo_C152',
   'Asobo_C172sp',
+  'Asobo_Cap10c',
   'Asobo_CJ4',
   'Asobo_DA40',
   'Asobo_DA62',
+  'Asobo_DR400',
   'Asobo_E330',
   'Asobo_Icon',
   'Asobo_KingAir350',
+  'Asobo_Longitude',
   'Asobo_Pitts',
   'Asobo_Savage_Cub',
+  'Asobo_SR22',
   'Asobo_TBM930',
+  'Asobo_VL3',
   'Asobo_XCub',
+  'Asobo_Bonanza',
 ];
 const { readdir, stat, mkdir } = require('fs').promises;
 
@@ -36,12 +43,10 @@ async function Start() {
   await fs.rmdirSync(`./liverypackDownloads`, { recursive: true });
   await fs.rmdirSync(`./public`, { recursive: true });
   const Directory = `./liverypackDownloads/`;
-  const downloadURL = 'https://liveriesmegapack.b-cdn.net/LiveriesMegaPackVersionX.1.zip';
+  const downloadURL = 'https://liveriesmegapack.com/LiveriesMegaPackVersion11.3.zip';
   const zipName = downloadURL.substr(downloadURL.lastIndexOf('/') + 1);
   const zipPath = Path.join(Directory, zipName);
   const extract = require('extract-zip');
-  const extractDir = `./liverypackDownloads/`;
-  const newDirName = 'liverypackDownloads';
   const unzipPath = resolve('./liverypackUnzip/');
 
   console.log(zipPath);
@@ -114,7 +119,7 @@ async function Start() {
 }
 
 async function moveFolders() {
-  const liveryPaths = await GetDirectories('./liverypackUnzip/Liveries Mega Pack/');
+  const liveryPaths = await GetDirectories('./liverypackUnzip/');
   await AsyncForEach(liveryPaths, async (livDir, i) => {
     const destFolder = getAircraftByPrefix(livDir);
     if (destFolder != undefined) {
@@ -123,12 +128,14 @@ async function moveFolders() {
           recursive: true,
         });
       }
-      ncp(`./liverypackUnzip/Liveries Mega Pack/${livDir}`, `./downloads/${destFolder}/${livDir}`, async function (err) {
+      let livDirDest = livDir;
+      livDirDest = livDirDest.replace(/\s/g, '_');
+      ncp(`./liverypackUnzip/${livDir}`, `./downloads/${destFolder}/${livDirDest}`, async function (err) {
         if (err) {
           return console.error(err);
         }
         console.log('done!');
-        await fs.rmdirSync(`./liverypackUnzip/Liveries Mega Pack/${livDir}`, { recursive: true });
+        await fs.rmdirSync(`./liverypackUnzip/${livDir}`, { recursive: true });
       });
     }
   });
