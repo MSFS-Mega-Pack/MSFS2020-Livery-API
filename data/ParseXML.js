@@ -43,6 +43,9 @@ async function getAllFiles(cache) {
     console.log(metaDataDB.length, metadataArray.liveries.length);
 
     let finalListing = {
+      totalLiveries: metadataArray.liveries.length,
+      totalLiveryPlaneCategories: 0,
+      totalAddonAirplanes: metadataArray.airplanes.length,
       airplanes: [],
       liveries: {},
     };
@@ -62,6 +65,7 @@ async function getAllFiles(cache) {
     }
 
     finalListing.liveries = SortLiveryByAircraft(fileListingLiveries);
+    finalListing.totalLiveryPlaneCategories = Object.keys(finalListing.liveries).length;
     try {
       if (CACHE_ENABLED) {
         await AllFilesCacheModel.remove();
