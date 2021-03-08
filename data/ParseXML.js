@@ -39,7 +39,7 @@ async function getAllFiles(cache) {
     let fileListing = [];
     for (let i = 0; i < metadataArray.liveries.length; i++) {
       let livery = metadataArray.liveries[i];
-      if (!livery.Path.startsWith('/liveriesinstaller/img') && !livery.Path.startsWith('img')) {
+      if (!livery.Path.startsWith('/liveriesinstaller/img') && !livery.Path.startsWith('img') && !livery.Path.startsWith('/liveriesinstaller/dev')) {
         let image = null,
           smallImage = null,
           checkSum = metaDataDB.filter(
