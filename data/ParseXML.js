@@ -19,6 +19,7 @@ let metaDataDB;
  */
 async function getAllFiles(cache) {
   if (!CACHE_ENABLED || cache.data.baseManifests.cdnFileListing === null || cache.data.baseManifests.cdnFileListing.hasExpired) {
+    if(CACHE_ENABLED){
     const now = Math.round(new Date().getTime() / 1000);
     try {
       const CacheDB = await AllFilesCacheModel.find();
@@ -35,6 +36,7 @@ async function getAllFiles(cache) {
     } catch (error) {
       console.log(error);
     }
+  }
 
     metadataArray = await getFilesFromStorage(`https://ny.storage.bunnycdn.com/liveriesinstaller/dev/`);
     metaDataDB = await LiveryModel.find();
@@ -61,17 +63,18 @@ async function getAllFiles(cache) {
 
     finalListing.liveries = SortLiveryByAircraft(fileListingLiveries);
     try {
-      //Disable cachinggg
-      // await AllFilesCacheModel.remove();
-      // const cacheModel = new AllFilesCacheModel({
-      //   createdAt: now,
-      //   validTill: now + 60 * 10,
-      //   Data: finalListing,
-      // });
-      // cacheModel.save(function (err, result) {
-      //   if (err) return console.log(err);
-      //   console.log(`Saved cache model!`);
-      // });
+      if(CACHE_ENABLED){
+      await AllFilesCacheModel.remove();
+      const cacheModel = new AllFilesCacheModel({
+        createdAt: now,
+        validTill: now + 60 * 10,
+        Data: finalListing,
+      });
+      cacheModel.save(function (err, result) {
+        if (err) return console.log(err);
+        console.log(`Saved cache model!`);
+      });
+    }
     } catch (error) {}
     cache.data.baseManifests.cdnFileListing = new CacheItem({
       cdnBaseUrl: Constants.CDN_URL,
@@ -163,7 +166,6 @@ module.exports = {
 function SortLiveryByAircraft(liveryArray) {
   let result = {};
   liveryArray.forEach(function (item) {
-    console.log(item);
     //if the key doesn;t yet exist in the object declare it as an empty array
     if (!result[item.airplane]) {
       result[item.airplane] = [];
@@ -177,8 +179,14 @@ function SortLiveryByAircraft(liveryArray) {
 
 async function getLiveryFormattedObject(livery) {
   if (!livery.Path.startsWith('/liveriesinstaller/img') && !livery.Path.startsWith('img')) {
+
+    let searchFilename = livery.Path.startsWith('/liveriesinstaller/livery/') ? `${livery.Path.split('/liveriesinstaller/livery/')[1].split('/')[0].trim()}/${livery.ObjectName}` : `${livery.Path.split('/liveriesinstaller/')[1].split('/')[0].trim()}/${livery.ObjectName}`;
+    if(livery.Path.startsWith('/liveriesinstaller/dev/livery')){
+      searchFilename = `${livery.Path.split('/liveriesinstaller/dev/livery/')[1].split('/')[0].trim()}/${livery.ObjectName}`;
+    }
+
     const planeObjectDB = metaDataDB.filter(
-      liv => liv.fileName == `${livery.Path.split('/liveriesinstaller/')[1].split('/')[0].trim()}/${livery.ObjectName}`
+      liv => liv.fileName == searchFilename || liv.fileName == `livery/${searchFilename}` || liv.fileName == `dev/livery/${searchFilename}`
     )[0];
     let image = null,
       smallImage = null,
@@ -218,12 +226,17 @@ async function getLiveryFormattedObject(livery) {
 }
 
 async function getPlaneFormattedObject(plane) {
+  let searchFilename = plane.Path.startsWith('/liveriesinstaller/plane/') ? `${plane.Path.split('/liveriesinstaller/plane/')[1].split('/')[0].trim()}/${plane.ObjectName}` : `${plane.Path.split('/liveriesinstaller/')[1].split('/')[0].trim()}/${plane.ObjectName}`;
+  if(plane.Path.startsWith('/liveriesinstaller/dev/plane')){
+    searchFilename = `${plane.Path.split('/liveriesinstaller/dev/plane/')[1].split('/')[0].trim()}/${plane.ObjectName}`;
+  }
+
   const airplane = plane.Path.split('/liveriesinstaller/dev/plane/')[1].split('/')[0].trim();
   const fileName = encodeURI(`${plane.Path}${plane.ObjectName}`.split('/liveriesinstaller/')[1]);
   let displayName = fileName.substr(fileName.lastIndexOf('/') + 1);
   displayName = displayName.substr(0, displayName.length - 4);
   const planeObjectDB = metaDataDB.filter(
-    liv => liv.fileName == `${plane.Path.split('/liveriesinstaller/')[1].split('/')[0].trim()}/${plane.ObjectName}`
+    liv => liv.fileName == searchFilename || liv.fileName == `plane/${searchFilename}` || liv.fileName == `dev/plane/${searchFilename}`
   )[0];
   let image = null,
     smallImage = null,
@@ -232,7 +245,8 @@ async function getPlaneFormattedObject(plane) {
   if (image === '0' || image === 'undefined') image = null;
   if (smallImage === '0' || smallImage === 'undefined') smallImage = null;
   if (image == null || smallImage == null) {
-    const thumbnailFound = await getThumbnail(metadataArray, livery.ObjectName.split('.zip')[0].trim());
+  
+    const thumbnailFound = await getThumbnail(metadataArray, plane.ObjectName.split('.zip')[0].trim());
     if (thumbnailFound.Image != null) image = encodeURI(thumbnailFound.Image.split('/liveriesinstaller')[1]);
     if (thumbnailFound.smallImage != null) smallImage = encodeURI(thumbnailFound.smallImage.split('/liveriesinstaller')[1]);
   }
